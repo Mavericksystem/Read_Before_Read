@@ -33,3 +33,7 @@ type errorResponse struct {
 	Status string  `json:"status"`
 	Error  errBody `json:"error"`
 }
+
+type errBody struct {
+	NimClient *nim.Client
+}
