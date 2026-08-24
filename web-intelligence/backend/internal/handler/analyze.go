@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 )
@@ -51,6 +52,12 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		writeError(w, http.StatusMethodNotAllowed, "validation", "only POST is supported", requestID)
+		return
+	}
+
+	var req analyzeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "validation", "malformed JSON body", requestID)
 		return
 	}
 
