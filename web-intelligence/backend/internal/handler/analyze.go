@@ -95,4 +95,8 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resp := successResponse{Status: "success"}
+	resp.Result.Title = doc.Title
+	resp.Result.NimAnswer = answer
+
 }
