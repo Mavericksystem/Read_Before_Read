@@ -86,4 +86,8 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	nimStart := time.Now()
+	answer, err := a.NimClient.Analyze(ctx, doc.Title, doc.Content, req.Question)
+	nimDuration := time.Since(nimStart)
+
 }
