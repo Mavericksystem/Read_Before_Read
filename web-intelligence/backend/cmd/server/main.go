@@ -18,3 +18,8 @@ func main() {
 
 	mux := http.NewserveMux()
 	mux.Handle("/api/v1/analyze", analyzer)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
