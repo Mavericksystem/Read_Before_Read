@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -42,4 +43,9 @@ type errBody struct {
 
 type Analyzer struct {
 	NimClient *nim.Client
+}
+
+func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
+	requestID := newRequestID()
 }
