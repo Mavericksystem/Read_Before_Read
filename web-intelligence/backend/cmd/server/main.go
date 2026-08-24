@@ -16,7 +16,7 @@ func main() {
 
 	analyze := &handler.Analyzer{NimClient: nimClient}
 
-	mux := http.NewserveMux()
+	mux := http.NewServeMux()
 	mux.Handle("/api/v1/analyze", analyzer)
 
 	port := os.Getenv("PORT")
