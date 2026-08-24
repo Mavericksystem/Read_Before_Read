@@ -90,4 +90,9 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	answer, err := a.NimClient.Analyze(ctx, doc.Title, doc.Content, req.Question)
 	nimDuration := time.Since(nimStart)
 
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "ai", "AI analysis failed", requestID)
+		return
+	}
+
 }
