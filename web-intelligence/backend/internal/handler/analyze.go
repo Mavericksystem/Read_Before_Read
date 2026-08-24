@@ -77,4 +77,13 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 	fetchDuration := time.Since(fetchStart)
 
+	if err != nil {
+		if extErr, ok := err.(*extractor.Error); ok {
+			writeError(w, statusFor(extErr.Category), extErr.Category, extErr.Message, requestID)
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "internal", "extraction failed", requestID)
+		return
+	}
+
 }
