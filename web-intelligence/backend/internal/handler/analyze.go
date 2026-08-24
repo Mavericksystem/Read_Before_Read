@@ -35,5 +35,11 @@ type errorResponse struct {
 }
 
 type errBody struct {
+	category  string `json:"category"`
+	Message   string `json:"message"`
+	RequestID string `json:"request_id"`
+}
+
+type Analyzer struct {
 	NimClient *nim.Client
 }
