@@ -14,4 +14,4 @@ func main() {
 		log.Fatalf("Failed to create NIM client: %v", err)
 	}
 
-	
+	analyze := &handler.Analyzer{NimClient: nimClient}
