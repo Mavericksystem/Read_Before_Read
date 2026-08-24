@@ -48,4 +48,10 @@ type Analyzer struct {
 func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	requestID := newRequestID()
+
+	if r.Method != http.MethodPost {
+		writeError(w, http.StatusMethodNotAllowed, "validation", "only POST is supported", requestID)
+		return
+	}
+
 }
