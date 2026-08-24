@@ -28,3 +28,8 @@ type meta struct {
 	FetchDurationMs int64  `json:"fetch_duration_ms"`
 	NimDurationMs   int64  `json:"nim_duration_ms"`
 }
+
+type errorResponse struct {
+	Status string  `json:"status"`
+	Error  errBody `json:"error"`
+}
