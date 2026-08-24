@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"time"
@@ -64,5 +65,8 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "validation", "url is required", requestID)
 		return
 	}
+
+	ctx, cancel() := context.WithTimeout(r.Context(), requestDeadline)
+	defer cancel()
 
 }
