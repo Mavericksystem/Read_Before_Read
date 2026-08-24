@@ -60,5 +60,9 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "validation", "malformed JSON body", requestID)
 		return
 	}
+	if req.URL == "" {
+		writeError(w, http.StatusBadRequest, "validation", "url is required", requestID)
+		return
+	}
 
 }
