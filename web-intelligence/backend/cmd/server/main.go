@@ -23,3 +23,9 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	log.Printf("listening on :%s", port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
+		log.Fatal(err)
+	}
+}
