@@ -98,5 +98,11 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp := successResponse{Status: "success"}
 	resp.Result.Title = doc.Title
 	resp.Result.NimAnswer = answer
+	resp.Meta = meta{
+		RequestID:       requestID,
+		TotalDurationMs: time.Since(start).Milliseconds(),
+		FetchDurationMs: fetchDuration.Milliseconds(),
+		NimDurationMs:   nimDuration.Milliseconds(),
+	}
 
 }
