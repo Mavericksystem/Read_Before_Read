@@ -69,4 +69,12 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel() := context.WithTimeout(r.Context(), requestDeadline)
 	defer cancel()
 
+	fetchStart := time.Now()
+	doc, err := extractor.Run(ctx, extractor.Request{
+		URL:              req.URL,
+		MaxResponseBytes: maxResponseBytes,
+		TimeoutMs:        extractor.DefaultTimeout.Milliseconds(),
+	})
+	fetchDuration := time.Since(fetchStart)
+
 }
