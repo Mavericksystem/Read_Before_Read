@@ -89,11 +89,19 @@ func (c *Client) Analyze(ctx context.Context, title, content, question string) (
 
 	var parsed chatResponse
 	if err := json.Unmarshal(respBody, &parsed); err != nil {
-		return "", fmt.Errorf("malformed nim response: %w", raw: %s", err, truncate(string(respBody), 300))
+		return "", fmt.Errorf("malformed nim response: %w, raw: %s", err, truncate(string(respBody), 300))
 	}
 	if len(parsed.Choices) == 0 {
 		return "", fmt.Errorf("nim response had no choices")
 	}
-		
+
 	return parsed.Choices[0].Message.Content, nil
+}
+
+func buildPrompt(title, content, question string) string {
+		if question != "" {
+			return fmt.Sprintf(
+				"Page title: %s\n\nPage content:\n%s\n\nQuestion: %s\n\nAnswer the question based only on the content above.", title, content, question)
+		}
+		return fmt.Sprintf("Page title: %s\n\nPage content:\n%s\n\nSummarize this page in a few sentences.", title, content)
 }
