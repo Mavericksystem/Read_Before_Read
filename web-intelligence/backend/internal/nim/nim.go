@@ -31,3 +31,8 @@ func NewClient() (*Client, error) {
 		httpClient: &http.Client{Timeout: 25 * time.Second},
 	}, nil
 }
+
+type chatMessage struct {
+	Role   string `json:"role"`
+	Content string `json:"content"`
+}
