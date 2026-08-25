@@ -41,3 +41,9 @@ type chatMessage struct {
 	Role   string `json:"role"`
 	Content string `json:"content"`
 }
+
+type chatResponse struct {
+	Choices []struct {
+		Message chatMessage `json:"message"`
+	} `json:"choices"`
+}
