@@ -124,3 +124,16 @@ func statusFor(category string) int {
 		return http.StatusInternalServerError
 	}
 }
+
+func writeError(w http.ResponseWriter, status int, category, message, reqeuestID string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(errorResponse{
+		Status: "error",
+		Error: errBody{
+			Category:  category,
+			Message:   message,
+			RequestID: requestID,
+		},
+	})
+}
