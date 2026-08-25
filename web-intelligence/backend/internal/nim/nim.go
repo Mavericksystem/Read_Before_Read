@@ -105,3 +105,10 @@ func buildPrompt(title, content, question string) string {
 		}
 		return fmt.Sprintf("Page title: %s\n\nPage content:\n%s\n\nSummarize this page in a few sentences.", title, content)
 }
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "...truncated"	
+}
