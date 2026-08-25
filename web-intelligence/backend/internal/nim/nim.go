@@ -84,6 +84,16 @@ func (c *Client) Analyze(ctx context.Context, title, content, question string) (
 		return "", fmt.Errorf("nim rate limit: %s", truncate(string(respBody), 300))
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errrorf("nim returned %d: %s", resp.StatusCode, truncate(string(respBody), 300))
+		return "", fmt.Errorf("nim returned %d: %s", resp.StatusCode, truncate(string(respBody), 300))
 	}
+
+	var parsed chatResponse
+	if err := json.Unmarshal(respBody, &parsed); err != nil {
+		return "", fmt.Errorf("malformed nim response: %w", raw: %s", err, truncate(string(respBody), 300))
+	}
+	if len(parsed.Choices) == 0 {
+		return "", fmt.Errorf("nim response had no choices")
+	}
+		
+	return parsed.Choices[0].Message.Content, nil
 }
