@@ -26,5 +26,8 @@ func NewClient() (*Client, error) {
 	if key == "" {
 		return nil, fmt.Errorf("NVIDIA_NIM_API_KEY not set")
 	}
-	
+	return &Client{
+		apiKey:    key,
+		httpClient: &http.Client{Timeout: 25 * time.Second},
+	}, nil
 }
