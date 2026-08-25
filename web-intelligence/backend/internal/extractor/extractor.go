@@ -11,3 +11,9 @@ type Document struct {
 	Content  string   `json:"content"`
 	Metadata Metadata `json:"metadata"`
 }
+
+type Metadata struct {
+	ContentType        string `json:"content_type"`
+	ContentLengthBytes int64  `json:"content_length_bytes"`
+	FetchDurationMs    int64  `json:"fetch_duration_ms"`
+}
