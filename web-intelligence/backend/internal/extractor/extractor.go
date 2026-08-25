@@ -23,3 +23,8 @@ type rustResponse struct {
 	Document *Document `json:"document,omitempty"`
 	Error    *RustErr  `json:"error,omitempty"`
 }
+
+type RustErr struct {
+	Category string `json:"category"`
+	Message  string `json:"message"`
+}
