@@ -47,3 +47,18 @@ type chatResponse struct {
 		Message chatMessage `json:"message"`
 	} `json:"choices"`
 }
+
+func (c *Client) Analyze(ctx context.Context, title, content, question string) (string, error) {
+	prompt := buildPrompt(title, content, question)
+
+	reqBody := chatRequest{
+		Model: model,
+		Messages: []chatMessage{
+			{Role: "user", Content: prompt},
+		},
+	}
+	body, err :=json.Marshal(reqBody)
+	if err != nil {
+		return "", fmt.Errorf("marshal nim request: %w", err)
+	}
+}
