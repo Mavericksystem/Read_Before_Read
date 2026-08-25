@@ -61,4 +61,11 @@ func (c *Client) Analyze(ctx context.Context, title, content, question string) (
 	if err != nil {
 		return "", fmt.Errorf("marshal nim request: %w", err)
 	}
+
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return "", fmt.Errorf("build nim request: %w", err)
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", "Bearer "+c.apiKey)
 }
