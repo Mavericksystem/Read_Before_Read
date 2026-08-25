@@ -28,3 +28,8 @@ type RustErr struct {
 	Category string `json:"category"`
 	Message  string `json:"message"`
 }
+
+type Error struct {
+	Category string
+	Message  string
+}
