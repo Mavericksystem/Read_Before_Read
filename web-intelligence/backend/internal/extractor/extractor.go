@@ -1,5 +1,7 @@
 package extractor
 
+import "fmt"
+
 type Request struct {
 	URL              string `json:"url"`
 	MaxResponseBytes int64  `json:"max_response_bytes"`
@@ -32,4 +34,8 @@ type RustErr struct {
 type Error struct {
 	Category string
 	Message  string
+}
+
+func (e *Error) Error() string {
+	return fmt.Sprintf("extractor: %s: %s", e.Category, e.Message)
 }
