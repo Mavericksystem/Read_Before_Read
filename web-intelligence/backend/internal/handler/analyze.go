@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"web-intelligence/backend/internal/extractor"
+	"web-intelligence/backend/internal/nim"
 )
 
-const requesDeadline = 30 * time.Second
+const requestDeadline = 30 * time.Second
 
-const maxRespnseBytes = 5 * 1024 * 1024
+const maxResponseBytes = 5 * 1024 * 1024
 
 type analyzeRequest struct {
 	URL      string `json:"url"`
@@ -47,7 +50,7 @@ type Analyzer struct {
 	NimClient *nim.Client
 }
 
-func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	requestID := newRequestID()
 
@@ -125,7 +128,7 @@ func statusFor(category string) int {
 	}
 }
 
-func writeError(w http.ResponseWriter, status int, category, message, reqeuestID string) {
+func writeError(w http.ResponseWriter, status int, category, message, requestID string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(errorResponse{
