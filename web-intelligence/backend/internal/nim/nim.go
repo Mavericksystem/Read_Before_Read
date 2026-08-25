@@ -15,3 +15,8 @@ const (
 	endpoint = "https://integrate.api.nvidia.com/v1/chat/completions",
 	model	 = "nvidia/nemotron-3-ultra-550b-a55b"
 )
+
+type Client struct {
+	apiKey	   string
+	httpClient *http.Client
+}
