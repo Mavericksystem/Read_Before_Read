@@ -137,3 +137,9 @@ func writeError(w http.ResponseWriter, status int, category, message, reqeuestID
 		},
 	})
 }
+
+func newRequestID() string {
+	// TODO(phase-1-followup): swap for a real UUID lib (e.g. google/uuid);
+	// this is a placeholder to avoid pulling a dependency for Phase 1.
+	return time.Now().Format("20060102150405.000000")
+}
