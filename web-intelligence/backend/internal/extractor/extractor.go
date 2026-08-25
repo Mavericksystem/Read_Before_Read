@@ -17,3 +17,9 @@ type Metadata struct {
 	ContentLengthBytes int64  `json:"content_length_bytes"`
 	FetchDurationMs    int64  `json:"fetch_duration_ms"`
 }
+
+type rustResponse struct {
+	Status   string    `json:"status"`
+	Document *Document `json:"document,omitempty"`
+	Error    *RustErr  `json:"error,omitempty"`
+}
