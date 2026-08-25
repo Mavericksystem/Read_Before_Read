@@ -109,3 +109,18 @@ func (a *analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	_ = json.NewEncoder(w).Encode(resp)
 }
+
+func statusFor(category string) int {
+	switch category {
+	case "invalid_url":
+		return http.StatusBadRequest
+	case "timeout":
+		return http.StatusGatewayTimeout
+	case "too_large", "unsupported_content_type", "no_content_extracted":
+		return http.StatusUnprocessableEntity
+	case "fetch_failure":
+		return http.StatusBadGateway
+	default:
+		return http.StatusInternalServerError
+	}
+}
