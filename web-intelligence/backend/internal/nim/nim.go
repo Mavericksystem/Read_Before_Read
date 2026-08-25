@@ -76,4 +76,14 @@ func (c *Client) Analyze(ctx context.Context, title, content, question string) (
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode == http.StatusUnauthorized {
+		return "", fmt.Errorf("nim auth failure: %s", truncate(string(respBody), 300))
+	}
+	if resp.StatusCode == http.StatusTooManyRequests {
+		return "", fmt.Errorf("nim rate limit: %s", truncate(string(respBody), 300))
+	}
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errrorf("nim returned %d: %s", resp.StatusCode, truncate(string(respBody), 300))
+	}
 }
