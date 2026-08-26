@@ -72,5 +72,12 @@ func run(ctx context.Context, req Request) (*Document, error) {
 			}
 		}
 	}
-	
+
+	var resp rustResponse
+	if err := json.Unmarshal(stdout.Bytes(), &resp); err != nil {
+		return nil, &Error{
+			Category: "internal",
+			Message: fmt.Sprintf("malformed extractor output: %v, raw:%s", err, truncate(stdout.String(), 500)),
+		}
+	}
 }
