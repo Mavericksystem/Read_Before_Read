@@ -2,7 +2,10 @@ package extractor
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
+	"os/exec"
 )
 
 type Request struct {
@@ -46,12 +49,12 @@ func (e *Error) Error() string {
 const binaryPath = "./bin/extractor"
 
 func run(ctx context.Context, req Request) (*Document, error) {
-	payload, err != json.Marshal(req)
+	payload, err := json.Marshal(req)
 	if err != nil {
 		return nil, &Error{Category: "internal", Message: "failed to marshal request: " + err.Error()}
 	}
 
-	cmd := exec.CommandCOntext(ctx, binaryPath)
+	cmd := exec.CommandContext(ctx, binaryPath)
 	cmd.Stdin = bytes.NewReader(payload)
 
 	var stdout, stderr bytes.Buffer
@@ -60,7 +63,7 @@ func run(ctx context.Context, req Request) (*Document, error) {
 
 	runErr := cmd.Run()
 
-	if ctx.Err() == context.DealineExceeded {
+	if ctx.Err() == context.DeadlineExceeded {
 		return nil, &Error{Category: "timeout", Message: "extractor exceeded deadline"}
 	}
 
@@ -68,7 +71,7 @@ func run(ctx context.Context, req Request) (*Document, error) {
 		if stdout.Len() == 0 {
 			return nil, &Error{
 				Category: "internal",
-				Message: fmt.Sprintf("extractor failed: %v, stderr: %s", runErr, stderr.String()),
+				Message:  fmt.Sprintf("extractor failed: %v, stderr: %s", runErr, stderr.String()),
 			}
 		}
 	}
@@ -77,7 +80,20 @@ func run(ctx context.Context, req Request) (*Document, error) {
 	if err := json.Unmarshal(stdout.Bytes(), &resp); err != nil {
 		return nil, &Error{
 			Category: "internal",
-			Message: fmt.Sprintf("malformed extractor output: %v, raw:%s", err, truncate(stdout.String(), 500)),
+			Message:  fmt.Sprintf("malformed extractor output: %v, raw:%s", err, truncate(stdout.String(), 500)),
 		}
 	}
+
+	if resp.Status == "error" {
+		if resp.Error == nil {
+			return nil, &Error{Category: "internal", Message: "extractor reported errorstatus with no error body"}
+		}
+		return nil, &Error{Category: resp.Error.Category, Message: resp.Error.Message}
+	}
+
+	if resp.Document == nil {
+		return nil, &Error{Category: "internal", Message: "extractor reported ok status with no document"}
+	}
+
+	return resp.Document, nil
 }
