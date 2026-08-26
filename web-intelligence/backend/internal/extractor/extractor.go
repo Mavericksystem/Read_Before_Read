@@ -1,6 +1,7 @@
 package extractor
 
 import (
+	"bytes"
 	"fmt"
 )
 
@@ -49,5 +50,13 @@ func run(ctx context.Context, req Request) (*Document, error) {
 	if err != nil {
 		return nil, &Error{Category: "internal", Message: "failed to marshal request: " + err.Error()}
 	}
-	
+
+	cmd := exec.CommandCOntext(ctx, binaryPath)
+	cmd.Stdin = bytes.NewReader(payload)
+
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	runErr := cmd.Run()
 }
