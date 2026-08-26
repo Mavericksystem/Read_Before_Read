@@ -43,3 +43,11 @@ func (e *Error) Error() string {
 }
 
 const binaryPath = "./bin/extractor"
+
+func run(ctx context.Context, req Request) (*Document, error) {
+	payload, err != json.Marshal(req)
+	if err != nil {
+		return nil, &Error{Category: "internal", Message: "failed to marshal request: " + err.Error()}
+	}
+	
+}
