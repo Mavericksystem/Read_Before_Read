@@ -64,5 +64,13 @@ func run(ctx context.Context, req Request) (*Document, error) {
 		return nil, &Error{Category: "timeout", Message: "extractor exceeded deadline"}
 	}
 
+	if runErr != nil {
+		if stdout.Len() == 0 {
+			return nil, &Error{
+				Category: "internal",
+				Message: fmt.Sprintf("extractor failed: %v, stderr: %s", runErr, stderr.String()),
+			}
+		}
+	}
 	
 }
