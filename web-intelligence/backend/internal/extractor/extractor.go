@@ -59,4 +59,10 @@ func run(ctx context.Context, req Request) (*Document, error) {
 	cmd.Stderr = &stderr
 
 	runErr := cmd.Run()
+
+	if ctx.Err() == context.DealineExceeded {
+		return nil, &Error{Category: "timeout", Message: "extractor exceeded deadline"}
+	}
+
+	
 }
