@@ -1,6 +1,8 @@
 package extractor
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Request struct {
 	URL              string `json:"url"`
@@ -39,3 +41,5 @@ type Error struct {
 func (e *Error) Error() string {
 	return fmt.Sprintf("extractor: %s: %s", e.Category, e.Message)
 }
+
+const binaryPath = "./bin/extractor"
