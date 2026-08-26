@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"time"
 )
 
 type Request struct {
@@ -97,3 +98,12 @@ func run(ctx context.Context, req Request) (*Document, error) {
 
 	return resp.Document, nil
 }
+
+func truncate(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	return s[:n] + "...(truncated)"
+}
+
+const DefaultTimeout = 20 * time.Second
