@@ -8,3 +8,12 @@ struct Request {
     max_response_bytes: u64,
     timeout_ms: u64,
 }
+
+#[derive(Serialize)]
+#[serde(tag = "status")]
+enum Response {
+    #[serde(rename = "ok")]
+    Ok { document: Document },
+    #[serde(rename = "error")]
+    Error { error: ErrorBody },
+}
