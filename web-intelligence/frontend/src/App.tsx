@@ -58,3 +58,7 @@ export default function App() {
                     onChange={(e) => setUrl(e.target.value)}
                     style={{ width: "100%", padding: "0.5rem" }}
                 />
+                <button type="submit" disabled={loading} style={{ marginTop: "0.5rem" }}>
+                    {loading ? "Analyzing..." : "Analyze"}
+                </button>
+            </form>
