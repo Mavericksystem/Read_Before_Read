@@ -24,3 +24,10 @@ struct Document {
     content: String,
     metadata: Metadata,
 }
+
+#[derive(Serialize)]
+struct Metadata {
+    content_type: String,
+    content_length_bytes: u64,
+    fetch_duration_ms: u128,
+}
