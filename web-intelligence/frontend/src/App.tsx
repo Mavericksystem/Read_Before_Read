@@ -32,4 +32,6 @@ export default function App() {
             });
             const data: AnalyzeResponse = await res.json();
             setResponse(data);
-        }
+        } catch (err) {
+            setResponse({
+                status: "error",
