@@ -14,3 +14,8 @@ interface AnalyzeError {
 type AnalyzeResponse = AnalyzeSuccess | AnalyzeError;
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8080";
+
+export default function App() {
+    const [url, setUrl] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [response, setResponse] = useState<AnalyzeResponse | null>(null);
