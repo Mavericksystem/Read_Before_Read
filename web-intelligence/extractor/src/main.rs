@@ -17,3 +17,10 @@ enum Response {
     #[serde(rename = "error")]
     Error { error: ErrorBody },
 }
+
+#[derive(Serialize)]
+struct Document {
+    title: String,
+    content: String,
+    metadata: Metadata,
+}
