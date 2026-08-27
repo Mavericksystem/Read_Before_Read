@@ -31,3 +31,9 @@ struct Metadata {
     content_length_bytes: u64,
     fetch_duration_ms: u128,
 }
+
+#[derive(Serialize)]
+struct ErrorBody {
+    category: &'static str,
+    message: String,
+}
