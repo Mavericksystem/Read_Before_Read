@@ -62,3 +62,12 @@ export default function App() {
                     {loading ? "Analyzing..." : "Analyze"}
                 </button>
             </form>
+
+            {response && (
+                <pre style={{ marginTop: "1rem", whiteSpace: "pre-wrap", background: "#f4f4f4", padding: "1rem" }}>
+                    {JSON.stringify(response, null, 2)}
+                </pre>
+            )}
+        </div>
+    );
+}
