@@ -19,3 +19,8 @@ export default function App() {
     const [url, setUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState<AnalyzeResponse | null>(null);
+
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        setLoading(true);
+        setResponse(null);
