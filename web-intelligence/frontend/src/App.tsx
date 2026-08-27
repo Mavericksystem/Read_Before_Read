@@ -35,3 +35,13 @@ export default function App() {
         } catch (err) {
             setResponse({
                 status: "error",
+                error: {
+                    category: "internal",
+                    message: err instanceof Error ? err.message : "unknown network error",
+                    request_id: "",
+                },
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
