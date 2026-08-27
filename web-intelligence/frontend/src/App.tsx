@@ -24,3 +24,9 @@ export default function App() {
         e.preventDefault();
         setLoading(true);
         setResponse(null);
+        try {
+            const res = await fetch(`${API_BASE}/api/v1/analyze`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url }),
+            });
