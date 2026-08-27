@@ -45,3 +45,16 @@ export default function App() {
             setLoading(false);
         }
     }
+
+    return (
+        <div style={{ fontFamily: "monospace", padding: "2rem", maxWidth: 700 }}>
+            <h1>Web Intelligence — Phase 1 vertical slice</h1>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="url"
+                    required
+                    placeholder="https://example.com/article"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    style={{ width: "100%", padding: "0.5rem" }}
+                />
