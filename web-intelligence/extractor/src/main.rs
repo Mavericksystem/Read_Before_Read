@@ -57,3 +57,9 @@ fn main() {
         emit_error("invalid_url", "url must start with http:// or https://");
         std::process::exit(1);
     }
+
+    match fetch_and_extract(&req) {
+        Ok(doc) => {
+            let resp = Response::Ok { document: doc };
+            print_json(&resp);
+        }
