@@ -40,3 +40,7 @@ struct ErrorBody {
 
 fn main() {
     let mut input = String::new();
+    if let Err(e) = io::stdin().read_to_string(&mut input) {
+        emit_error("internal", &format!("failed to read stdin: {e}"));
+        std::process::exit(1);
+    }
