@@ -44,3 +44,11 @@ fn main() {
         emit_error("internal", &format!("failed to read stdin: {e}"));
         std::process::exit(1);
     }
+
+    let req: Request = match serde_json::from_str(&input) {
+        Ok(r) => r,
+        Err(e) => {
+            emit_error("invalid_url", &format!("malformed request JSON: {e}"));
+            std::process::exit(1);
+        }
+    };
