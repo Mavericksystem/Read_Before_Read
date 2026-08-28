@@ -63,3 +63,9 @@ fn main() {
             let resp = Response::Ok { document: doc };
             print_json(&resp);
         }
+        Err((category, message)) => {
+            emit_error(category, &message);
+            std::process::exit(1);
+        }
+    }
+}
