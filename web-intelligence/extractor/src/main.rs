@@ -52,3 +52,8 @@ fn main() {
             std::process::exit(1);
         }
     };
+
+    if !req.url.starts_with("http://") && !req.url.starts_with("https://") {
+        emit_error("invalid_url", "url must start with http:// or https://");
+        std::process::exit(1);
+    }
