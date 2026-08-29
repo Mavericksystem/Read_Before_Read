@@ -72,3 +72,8 @@ fn main() {
 
 fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> {
     let start = std::time::Instant::now();
+
+    let client = reqwest::blocking::Client::builder()
+        .timeout(Duration::from_millis(req.timeout_ms))
+        .build()
+        .map_err(|e| ("internal", e.to_string()))?;
