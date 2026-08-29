@@ -69,3 +69,6 @@ fn main() {
         }
     }
 }
+
+fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> {
+    let start = std::time::Instant::now();
