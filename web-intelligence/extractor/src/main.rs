@@ -77,3 +77,8 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
         .timeout(Duration::from_millis(req.timeout_ms))
         .build()
         .map_err(|e| ("internal", e.to_string()))?;
+
+    let resp = client
+        .get(&req.url)
+        .send()
+        .map_err(|e|
