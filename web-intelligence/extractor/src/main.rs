@@ -88,3 +88,8 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
                 ("fetch_failed", e.to_string())
             }
         })?;
+
+    let status = resp.status();
+    if !status.is_success() {
+        return Err(("fetch_failed", format!("upstream returned {status}")));
+    }
