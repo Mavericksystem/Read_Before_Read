@@ -100,3 +100,10 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
         .and_then(|v| v.to_str().ok())
         .unwrap_or("")
         .to_string();
+
+    if !content_type.contains("text/html") && !content_type.is_empty() {
+        return Err((
+            "unsupported_content_type",
+            format!("got {content_type}, only text/html supported in phase 1"),
+        ));
+    }
