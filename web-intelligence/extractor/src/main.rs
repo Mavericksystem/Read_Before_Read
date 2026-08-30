@@ -111,3 +111,10 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
     let max = req.max_response_bytes;
     let mut buf: Vec<u8> = Vec::new();
     let mut reader = resp.take(max + 1);
+    reader
+        .read_to_end(&mut buf)
+        .map_err(|e| ("fetch_failed", e.to_string()))?;
+    if buf.len() as U64 > max {
+        return Err(("too_large", format!("response exceeded {max} bytes")));
+    }
+    
