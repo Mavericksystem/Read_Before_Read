@@ -93,3 +93,10 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
     if !status.is_success() {
         return Err(("fetch_failed", format!("upstream returned {status}")));
     }
+
+    let content_type = resp
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("")
+        .to_string();
