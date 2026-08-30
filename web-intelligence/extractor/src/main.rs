@@ -117,4 +117,16 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
     if buf.len() as U64 > max {
         return Err(("too_large", format!("response exceeded {max} bytes")));
     }
+
+    let html = String::from_utf8_lossy(&buf).to_string();
+    let document = scraper::Html::parse_document(&html);
+
+    let title_sel = scraper::Selector::parse("title").unwrap();
+    let title = document
     
+        .select(&title_sel)
+        .next()
+        .map(|n| n.text().collect::<Vec<_>>().join(""))
+        .unwrap_or_default();
+        .trim()
+        .to_string();
