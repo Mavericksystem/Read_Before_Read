@@ -107,3 +107,7 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
             format!("got {content_type}, only text/html supported in phase 1"),
         ));
     }
+
+    let max = req.max_response_bytes;
+    let mut buf: Vec<u8> = Vec::new();
+    let mut reader = resp.take(max + 1);
