@@ -130,3 +130,6 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
         .unwrap_or_default();
         .trim()
         .to_string();
+
+    let body_sel = scraper::Selector::parse("body").unwrap();
+    let content = document
