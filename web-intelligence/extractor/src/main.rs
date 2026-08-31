@@ -133,3 +133,11 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
 
     let body_sel = scraper::Selector::parse("body").unwrap();
     let content = document
+        .select(&body_sel)
+        .next()
+        .map(|n| n.text().collect::<Vec<_>>().join(" "))
+        .unwrap_or_default();
+
+    if content.trim().is_empty() {
+        return Err(("no_content_extracted", "body has no text content".into()));
+    }
