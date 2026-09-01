@@ -166,3 +166,13 @@ fn emit_error(category: &'static str, message: &str) {
         },
     };
 }
+
+fn print_json<T: Serialize>(v: &T) {
+    let out = serde_json::to_string(v).unwrap_or_else(|_| {
+        r#"{"status":"error","error":{"category":"internal","message":"failed to serialize response JSON"}}"#.to_string()
+    });
+    let mut stdout = io::stdout();
+    let _ = stdout.write_all(out.as_bytes());
+    let _ = stdout.flush();
+    println!("{}", out);
+}
