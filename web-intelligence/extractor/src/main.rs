@@ -155,3 +155,14 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
             fetch_duration_ms: start.elapsed().as_millis(),
         }
     })
+
+}
+
+fn emit_error(category: &'static str, message: &str) {
+    let resp = Response::Error {
+        error: ErrorBody {
+            category,
+            message: message.to_string(),
+        },
+    };
+}
