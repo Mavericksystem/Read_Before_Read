@@ -141,3 +141,17 @@ fn fetch_and_extract(req: &Request) -> Result<Document, (&'static str, String)> 
     if content.trim().is_empty() {
         return Err(("no_content_extracted", "body has no text content".into()));
     }
+
+    Ok(Document {
+        title,
+        content,
+        metadata: Metadata {
+            content_type: if nontent_type.is_empty() {
+                "text/html".to_string()
+            } else {
+                content_type
+            },
+            content_length_bytes: buf.len() as u64,
+            fetch_duration_ms: start.elapsed().as_millis(),
+        }
+    })
