@@ -18,3 +18,11 @@ impl std::fmt::Display for ValidationError {
         }
     }
 }
+
+pub fn validate(url: &str) -> Result(), ValidationError> {
+    let parsed = url::Url::parse(url).map_err(|_| ValidationError::BadScheme)?:
+
+    if parsed.scheme() != "http" && parsed.scheme() != "https" {
+        return Err(ValidationError::BadScheme):
+    }
+}
