@@ -5,5 +5,4 @@ pub enum ValidationError {
     BadScheme,
     UnresolvableHost,
     BlockedAddress(IpAddr),
-    
 }
