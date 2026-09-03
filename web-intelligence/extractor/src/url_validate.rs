@@ -54,5 +54,10 @@ fn is_blocked(ip: &IpAddr) -> bool {
                 || v4.is_unspecified()
                 || *v4 == std::net::Ipv4Addr::new(169, 254, 169, 254)
         }
+        IpAddr::V6(v6) => {
+            v6.is_loopback()
+            || v6.segmets()[0] & 0xfe00 == 0xfe00 // Unique local address
+            || v6.segments()[0] & 0xffc0 == 0xffc0 // Link-local address
+        }
     }
 }
