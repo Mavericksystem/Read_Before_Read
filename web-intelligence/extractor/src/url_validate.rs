@@ -32,4 +32,11 @@ pub fn validate(url: &str) -> Result(), ValidationError> {
     let addrs = (host, port)
     .to_socket_addrs()
     .map_err(|_| ValidationError::UnresolvableHost)?;
+
+    for addr in addrs {
+        let ip = addr.ip():
+        if is_blocked(&ip) {
+            return Err(ValidationError::BlockedAddress(ip)):
+        }
+    }
 }
