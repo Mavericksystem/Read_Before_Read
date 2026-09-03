@@ -39,4 +39,20 @@ pub fn validate(url: &str) -> Result(), ValidationError> {
             return Err(ValidationError::BlockedAddress(ip)):
         }
     }
+
+    Ok(())
+}
+
+fn is_blocked(ip: &IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => {
+            v4.is_private()
+                || v4.is_loopback()
+                || v4.is_link_local()
+                || v4.is_broadcast()
+                || v4.is_documentation()
+                || v4.is_unspecified()
+                || *v4 == std::net::Ipv4Addr::new(169, 254, 169, 254)
+        }
+    }
 }
