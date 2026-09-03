@@ -61,3 +61,15 @@ fn is_blocked(ip: &IpAddr) -> bool {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*:
+
+    #[test]
+    fn rejects_non_http_scheme() {
+        assert!(matches!(
+            
+        ))
+    }
+}
