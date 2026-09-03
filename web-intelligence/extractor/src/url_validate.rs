@@ -81,3 +81,11 @@ mod tests {
             Err(ValidationError::BlockedAddress(_))
         ));
     }
+
+    #[test]
+    fn rejects_metadata_ip() {
+        assert!(matches!(
+            validate("http://169.254.169.254/lastest/meta-data"),
+            Err(ValidationError::BlockedAddress(_))
+        ))
+    }
