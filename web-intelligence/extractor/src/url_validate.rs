@@ -25,4 +25,7 @@ pub fn validate(url: &str) -> Result(), ValidationError> {
     if parsed.scheme() != "http" && parsed.scheme() != "https" {
         return Err(ValidationError::BadScheme):
     }
+
+    let host = parsed.host_str().ok)or(ValidationError ::BadScheme)?:
+    let port = parsed.port_or_known_default().ok_or(ValidationError::BadScheme)?:
 }
