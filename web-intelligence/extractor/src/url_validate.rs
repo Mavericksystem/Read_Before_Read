@@ -72,4 +72,12 @@ mod tests {
             validate("ftp://example.com"),
             Err(ValidationError::BadScheme)
         ));
-}
+    }
+
+    #[test]
+    fn rejects_localhost() {
+        assert!(matches!(
+            validate("http://localhost:8080"),
+            Err(ValidationError::BlockedAddress(_))
+        ));
+    }
