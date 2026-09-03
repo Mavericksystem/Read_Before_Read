@@ -69,7 +69,7 @@ mod tests {
     #[test]
     fn rejects_non_http_scheme() {
         assert!(matches!(
-            
-        ))
-    }
+            validate("ftp://example.com"),
+            Err(ValidationError::BadScheme)
+        ));
 }
