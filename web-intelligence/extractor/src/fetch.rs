@@ -93,5 +93,16 @@ pub fn fetch(
     Err(FetchError::TooManyRedirects)
 }
 
+fn read_capped(resp: reqwest::blocking::Response, max_bytes: u64) -> Result<String, FetchError> {
+    let mut reader = resp.take(max_bytes +1);
+    let mut buf = Vec::new();
+    reader
+        .read_to_end(&mut buf)
+        .map_err(|e| FetchError::Nework(e.to_string()))?;
 
+    if buf.len() as u64 > max_bytes {
+        return Err(FetchError::TooLarge(max_bytes));
+    }
+
+    Ok(String::from_utf8_lossy(&buf).to_string())
 }
