@@ -74,3 +74,7 @@ fn extract_content(html: &str) -> String {
 
     clean_text(&filtered)
 }
+
+fn clean_text(s: &str) -> String {
+    s.split_whitespace().collect::<Vec<_>>().join(" ").trim().to_string()
+}
