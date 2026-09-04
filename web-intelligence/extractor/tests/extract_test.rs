@@ -8,4 +8,10 @@ fn url_validate_rejects_private_ip_ranges() {
         "http://192.168.1.1",
         "http://169.254.169.254",
     ];
+    for url in cases {
+        assert!(
+            url_validate::validate(url).is_err(),
+            "expected {url} to be rejected"
+        );
+    }
 }
