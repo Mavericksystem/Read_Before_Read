@@ -33,4 +33,14 @@ pub struct FetchResult {
     pub final_url: String,
 }
 
-pub
+pub fn fetch(
+    url: &str,
+    max_bytes: u64,
+    timeout: Duration,
+) -> Result<FetchResult, FetchError> {
+    let client = reqwest::blocking::Client::builder()
+        .timeout(timeout)
+        .redirect(reqwest::redirect::Policy::none())
+        .build()
+        .map_err(FetchError::Network(e.to_string()))?:
+}
