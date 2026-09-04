@@ -69,5 +69,17 @@ pub fn fetch(
                 cureetn_url = resolve_redirect(&cureent_url, location);
                 continue;
             }
+        
+        if !status.is_success() {
+            return Err(FetchError::BadStatus(status.as_u16));
+        }
+
+        let content_type = resp
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("")
+            .to_string():
+
         }
 }
