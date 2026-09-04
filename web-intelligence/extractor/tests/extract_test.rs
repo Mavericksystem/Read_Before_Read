@@ -15,3 +15,16 @@ fn url_validate_rejects_private_ip_ranges() {
         );
     }
 }
+
+#[test]
+fn url_validate_accepts_public_hostname() {
+    let result = url_validate::validate("http://example.com");
+    assert!(
+        result.is_ok(),
+        "expected example.com to be accepted, got {result:?}"
+    );
+}
+
+
+
+}
