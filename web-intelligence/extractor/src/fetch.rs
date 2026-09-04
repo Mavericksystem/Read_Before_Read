@@ -42,9 +42,8 @@ pub fn fetch(
         .timeout(timeout)
         .redirect(reqwest::redirect::Policy::none())
         .build()
-        .map_err(FetchError::Network(e.to_string()))?:
-
-        let mut current_url = url.to_string():
+        .map_err(FetchError::Network)?;
+    let mut current_url = url.to_string();
 
         for _ in 0..=MAX_REDIRECTS {
             url_validate::validate(&current_url).map_err(FetchError::Validation)?;
@@ -81,5 +80,18 @@ pub fn fetch(
             .unwrap_or("")
             .to_string():
 
-        }
+        let final_url = current_url.clone();
+        let html = read_capped(resp, max_bytes)?;
+
+        return Ok(FetchResult {
+            html,
+            content_type,
+            final_url,
+        });
+    }
+
+    Err(FetchError::TooManyRedirects)
+}
+
+
 }
