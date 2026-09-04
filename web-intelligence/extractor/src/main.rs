@@ -1,5 +1,3 @@
-
-
 mod extract;
 mod fetch;
 mod url_validate;
@@ -84,11 +82,37 @@ fn run(req: &Request) -> Result<Document, (&'static str, String)> {
     if !fetch_result.content_type.contains("text/html") && !fetch_result.content_type.is_empty() {
         return Err((
             "unsupported_content_type",
-            format!("got {}, only text/html supported", fetch_result.content_type),
+            format!(
+                "got {}, only text/html supported",
+                fetch_result.content_type
+            ),
         ));
     }
 
-    
+    let extracted = extract::extract(&fetch_result.html);
+
+    if extracted.content.trim().is_empty() {
+        return Err((
+            "no_content_extracted",
+            "no text content found — page may require JavaScript (out of scope, ADR-009)".into(),
+        ));
+    }
+
+    Ok(Document {
+        title: extracted.title,
+        content: extracted.content,
+        metadata: Metadata {
+            content_type: if fetch_result.content_type.is_empty() {
+                "text/html".to_string()
+            } else {
+                fetch_result.content_type
+            },
+            content_length_bytes: fetch_result.html.len() as u64,
+            fetch_duration_ms: start.elapsed().as_millis(),
+            final_url: fetch_result.final_url,
+        },
+    })
+}
 
 fn emit_error(category: &'static str, message: &str) {
     print_json(&Response::Error {
