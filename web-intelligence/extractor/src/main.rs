@@ -114,6 +114,20 @@ fn run(req: &Request) -> Result<Document, (&'static str, String)> {
     })
 }
 
+fn map_fetch_error(e: fetch::FetchError) -> (&'static str, String) {
+    use fetch::FetchError;
+    let msg = e.to_string();
+    let category = match e {
+        FetchError::Validation(_) => "invalid_url",
+        FetchError::TooManyRedirects => "fetch_failed",
+        FetchError::Timeout => "timeout",
+        FetchError::Network(_) => "fetch_failed",
+        FetchError::TooLarge(_) => "too_large",
+        FetchError::BadStatus(_) => "fetch_failed",
+    };
+    (category, msg)
+}
+
 fn emit_error(category: &'static str, message: &str) {
     print_json(&Response::Error {
         error: ErrorBody {
