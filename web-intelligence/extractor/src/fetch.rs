@@ -106,3 +106,10 @@ fn read_capped(resp: reqwest::blocking::Response, max_bytes: u64) -> Result<Stri
 
     Ok(String::from_utf8_lossy(&buf).to_string())
 }
+
+fn resolve_redirect(base: &str, location: &str) -> String {
+    match url::Url::parse(base).and_then(|b| b.join(location)) {
+        Ok(joined) => joined.to_string(),
+        Err(_) => location.to_string(),
+    }
+}
