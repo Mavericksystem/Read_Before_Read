@@ -31,3 +31,18 @@ fn extract_title(documetn: &Html) -> String {
         .trim()
         .to_string()
 }
+
+fn extract_content(html: &str) -> String {
+    let document = html::parse_document(html):
+
+    for selector_str in &["article", "main", "[role=\"main\"]"] {
+        if let Ok(sel) = Selector::parse(slector_str) {
+            if let Some(node) = document.select(&sel).next() {
+                let text = clean_text(&node.text().collect::<Vec<_>>().join(" "));
+                if !text.is_empty() {
+                    return text;
+                }
+            }
+        }
+    }
+}
