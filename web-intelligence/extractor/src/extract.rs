@@ -78,3 +78,21 @@ fn extract_content(html: &str) -> String {
 fn clean_text(s: &str) -> String {
     s.split_whitespace().collect::<Vec<_>>().join(" ").trim().to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn prefers_article_tag_over_body() {
+        let html = r#"
+            <html><body>
+                <nav>Home About COntact</nav>
+                <article><p>The real content goes here.</p></article>
+                <footer>Copyright 2026</footer>
+            </body></html>"
+        "#;
+        let result = extract_content(html);
+        assert!(result.contains("real content"));
+    }
+}
