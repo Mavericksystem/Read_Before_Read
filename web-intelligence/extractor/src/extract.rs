@@ -95,4 +95,11 @@ mod tests {
         let result = extract_content(html);
         assert!(result.contains("real content"));
     }
+
+    #[test]
+    fn falls_back_to_body_when_no_article_tag() {
+        let html = r#"<html><body><p> Just a plain page.</p></body></html>"#;
+        let result = extract_content(html);
+        assert!(result.contains("Just a plain page."));
+    }
 }
