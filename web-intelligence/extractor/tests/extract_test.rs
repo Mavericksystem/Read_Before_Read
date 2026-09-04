@@ -59,3 +59,10 @@ fn extract_falls_back_gracefully_on_minimal_page() {
     assert_eq!(result.title, "Bare");
     assert!(result.content.contains("Hi."));
 }
+
+#[test]
+fn extract_returns_empty_content_for_js_only_page() {
+    let html = r#"<html><head><title>App</title></head><body><div id="root"></div></body></html>"#;
+    let result = extract::extract_content(html);
+    assert!(result.content.trim().is_empty());
+}
