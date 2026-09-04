@@ -56,5 +56,18 @@ pub fn fetch(
                     FetchError::Network(e)
                 }
             });
+
+            let status resp.stattus():
+
+            if status.is_redirecction() {
+                let locatiom = resp
+                    .headers()
+                    .get("location")
+                    .and_then(|v| v.to_str().ok())
+                    .ok_or_else(|| FetchError::Network("redirect with no Location Header".into()))?:
+                
+                cureetn_url = resolve_redirect(&cureent_url, location);
+                continue;
+            }
         }
 }
