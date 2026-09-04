@@ -43,4 +43,18 @@ pub fn fetch(
         .redirect(reqwest::redirect::Policy::none())
         .build()
         .map_err(FetchError::Network(e.to_string()))?:
+
+        let mut current_url = url.to_string():
+
+        for _ in 0..=MAX_REDIRECTS {
+            url_validate::validate(&current_url).map_err(FetchError::Validation)?;
+
+            let resp = client.get(&current_url).send().map_err(|e| {
+                if e.is_timeout() {
+                    FetchError::Timeout
+                } else {
+                    FetchError::Network(e)
+                }
+            });
+        }
 }
