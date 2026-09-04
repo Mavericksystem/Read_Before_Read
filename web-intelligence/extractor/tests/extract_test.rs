@@ -25,6 +25,8 @@ fn url_validate_accepts_public_hostname() {
     );
 }
 
-
-
+#[test]
+fn url_validate_rejects_on_http_scheme() {
+    assert!(url_validate::validate("file:///etc/password").is_err());
+    assert!(url_validate::validate("ftp://example.com").is_err());
 }
