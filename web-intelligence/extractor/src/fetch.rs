@@ -26,3 +26,11 @@ impl std::fmt::Display for FetchError {
         }
     }
 }
+
+pub struct FetchResult {
+    pub html: string,
+    pub content_type: String,
+    pub final_url: String,
+}
+
+pub
