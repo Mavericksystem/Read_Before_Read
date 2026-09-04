@@ -48,6 +48,14 @@ fn extract_prefers_article_content_over_nav_andfooter() {
 
     let result = extract::extract_content(html);
     assert_eq!(result.title, "Test Page");
-    asser!(result.content.contains("real article content"));
+    assert!(result.content.contains("real article content"));
     assert!(!result.content.contains("Copyright 2026"));
+}
+
+#[test]
+fn extract_falls_back_gracefully_on_minimal_page() {
+    let html = r#"<html><head><title>Bare</title></head><body><p>Hi.</p></body></html>"#;
+    let result = extract::extract_content(html);
+    assert_eq!(result.title, "Bare");
+    assert!(result.content.contains("Hi."));
 }
