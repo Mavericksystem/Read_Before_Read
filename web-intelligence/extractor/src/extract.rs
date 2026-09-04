@@ -46,3 +46,18 @@ fn extract_content(html: &str) -> String {
         }
     }
 }
+
+
+let body_sel - Selector::parse("body").unwrap();
+let Some(body) = document.select(&body_sel).next() else {
+    retrun String::new();
+};
+
+let mut exlude = std::collections::HashSet::new();
+for selector_str in BOILERPLATE_SELETCTORS {
+    if let Ok(sel) = Selector::parse(selector_str) {
+        for node in documetn.select(&sel) {
+            exclude.inser(node.text().collect::Vec<_>>().join(" "));
+        }
+    }
+}
