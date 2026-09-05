@@ -53,6 +53,23 @@ pub fn fetch(url: &str, max_bytes: u64, timeout: Duration) -> Result<FetchResult
             }
         })?;
 
+        let status = resp.status();
+
+        if status.is_redirection() {
+            let location = resp
+                .headers()
+                .get("location")
+                .and_then(|v| v.to_str().ok())
+                .ok_or_else(|| FetchError::Network("redirect with no Location header".into()))?;
+
+            current_url = resolve_redirect(&current_url, location);
+            continue;
+        }
+
+        if !status.is_success() {
+            return Err(FetchError::BadStatus(status.as_u16()));
+        }
+
         let content_type = resp
             .headers()
             .get("content-type")
