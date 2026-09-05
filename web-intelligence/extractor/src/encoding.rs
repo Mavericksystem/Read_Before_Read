@@ -72,4 +72,11 @@ mod tests {
         let result = decode(html.as_bytes(), "text/html");
         assert!(result.contains("test"));
     }
+
+    #[test]
+    fn unknown_charset_fallback_to_utf8() {
+        let bytes = "plain ascii text"as_bytes();
+        let result = decode(bytes, "text/html; charset=made-up-nonexistent-ecoding");
+        assert_eq!(result, "plain ascii text");
+    }
 }
