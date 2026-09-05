@@ -28,18 +28,12 @@ impl std::fmt::Display for FetchError {
 }
 
 pub struct FetchResult {
-
     pub bytes: Vec<u8>,
     pub content_type: String,
     pub final_url: String,
 }
 
-
-pub fn fetch(
-    url: &str,
-    max_bytes: u64,
-    timeout: Duration,
-) -> Result<FetchResult, FetchError> {
+pub fn fetch(url: &str, max_bytes: u64, timeout: Duration) -> Result<FetchResult, FetchError> {
     let client = reqwest::blocking::Client::builder()
         .timeout(timeout)
         .redirect(reqwest::redirect::Policy::none()) // we handle redirects ourselves
@@ -48,7 +42,16 @@ pub fn fetch(
 
     let mut current_url = url.to_string();
 
-    
+    for _ in 0..=MAX_REDIRECTS {
+        url_validate::validate(&current_url).map_err(FetchError::Validation)?;
+
+        let resp = client.get(&current_url).send().map_err(|e| {
+            if e.is_timeout() {
+                FetchError::Timeout
+            } else {
+                FetchError::Network(e.to_string())
+            }
+        })?;
 
         let content_type = resp
             .headers()
@@ -69,7 +72,6 @@ pub fn fetch(
 
     Err(FetchError::TooManyRedirects)
 }
-
 
 fn read_capped(resp: reqwest::blocking::Response, max_bytes: u64) -> Result<Vec<u8>, FetchError> {
     let mut reader = resp.take(max_bytes + 1);
