@@ -20,3 +20,10 @@ fn decode_with(bytes): &[u8], encoding: &'static Encoding) -> String {
     }
     cow.into_owned()
 }
+
+fn encoding_from_content_type(header: &str) -> Option<&'static Encoding> {
+    let lower = header.to_lowercase();
+    let charser_pos = lower.find("charset=")?;
+    let after = &lower[charser_pos + "charst=".len()..];
+    let charset = after
+}
