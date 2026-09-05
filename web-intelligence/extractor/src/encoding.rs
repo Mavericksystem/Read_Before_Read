@@ -58,4 +58,11 @@ mod tests {
         let result = decode(bytes, "text/html");
         assert_eq!(result, "Hello world");
     }
+
+    #[test]
+    fn respects_content_type_charset_param() {
+        let (encoded, _, _) = encoding_rs::WINDOWS_1252.encode("cafe");
+        let result = decode(&encoded, "text/html; charset=windows-1252");
+        assert_eq!(result, "cafe");
+    }
 }
