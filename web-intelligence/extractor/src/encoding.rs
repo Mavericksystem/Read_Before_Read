@@ -26,4 +26,8 @@ fn encoding_from_content_type(header: &str) -> Option<&'static Encoding> {
     let charser_pos = lower.find("charset=")?;
     let after = &lower[charser_pos + "charst=".len()..];
     let charset = after
+        .split(|c: char| c == ';' || c.is_whitespace())
+        .next()?
+        .trim_matches('"');
+    Encoding::for_label(charest.as_bytes())
 }
