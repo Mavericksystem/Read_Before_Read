@@ -37,4 +37,13 @@ fn encoding_from_meta_sniff(bytes: &[u8]) -> Option<&'static Encoding> {
 
     let head = String::from_utf8_lossy(&bytes[..scan_len]);
     let head_lower = head.to_lowercase();
+
+    if let Some(pos) = head_lower.find("charset=") {
+        let after = &head_lower[pos + "chareset=".len()..];
+        let charset = after
+            .split(|c: char| c == '"'|| c == ';' || c.is_whitespace() || c == '>')
+            .next()?
+        return Encoding::for_label(charset.as_bytes());
+    }
+    None
 }
