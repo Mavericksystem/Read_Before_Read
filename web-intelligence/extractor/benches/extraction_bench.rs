@@ -40,4 +40,15 @@ fn bench_extraction(c: &mut Criterion) {
     group.bench_with_input(BenchmarkId::new("large_page", large.len()), &large, |b, html| {
         b.iter(|| extract(black_box(html)));
     });
+
+    group.finish();
+}
+
+fn bench_process_strtup(c: &mut Criterion) {
+    let binary = env!("CARGO_BIN_EXE_extractor");
+
+    c.bench_function("subprocess_spawn_overhead", |b| {
+        b.iter(|| {
+            use std::io::Write;
+        })
 }
