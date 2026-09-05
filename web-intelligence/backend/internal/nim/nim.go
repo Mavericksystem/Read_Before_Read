@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	endpoint = "https://integrate.api.nvidia.com/v1/chat/completions",
-	model	 = "nvidia/nemotron-3-ultra-550b-a55b"
+	endpoint = "https://integrate.api.nvidia.com/v1/chat/completions"
+	model    = "nvidia/nemotron-3-ultra-550b-a55b"
 )
 
 type Client struct {
-	apiKey	   string
+	apiKey     string
 	httpClient *http.Client
 }
 
@@ -27,7 +27,7 @@ func NewClient() (*Client, error) {
 		return nil, fmt.Errorf("NVIDIA_NIM_API_KEY not set")
 	}
 	return &Client{
-		apiKey:    key,
+		apiKey:     key,
 		httpClient: &http.Client{Timeout: 25 * time.Second},
 	}, nil
 }
@@ -38,7 +38,7 @@ type chatRequest struct {
 }
 
 type chatMessage struct {
-	Role   string `json:"role"`
+	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
@@ -57,7 +57,7 @@ func (c *Client) Analyze(ctx context.Context, title, content, question string) (
 			{Role: "user", Content: prompt},
 		},
 	}
-	body, err :=json.Marshal(reqBody)
+	body, err := json.Marshal(reqBody)
 	if err != nil {
 		return "", fmt.Errorf("marshal nim request: %w", err)
 	}
@@ -99,16 +99,16 @@ func (c *Client) Analyze(ctx context.Context, title, content, question string) (
 }
 
 func buildPrompt(title, content, question string) string {
-		if question != "" {
-			return fmt.Sprintf(
-				"Page title: %s\n\nPage content:\n%s\n\nQuestion: %s\n\nAnswer the question based only on the content above.", title, content, question)
-		}
-		return fmt.Sprintf("Page title: %s\n\nPage content:\n%s\n\nSummarize this page in a few sentences.", title, content)
+	if question != "" {
+		return fmt.Sprintf(
+			"Page title: %s\n\nPage content:\n%s\n\nQuestion: %s\n\nAnswer the question based only on the content above.", title, content, question)
+	}
+	return fmt.Sprintf("Page title: %s\n\nPage content:\n%s\n\nSummarize this page in a few sentences.", title, content)
 }
 
 func truncate(s string, n int) string {
 	if len(s) <= n {
 		return s
 	}
-	return s[:n] + "...truncated"	
+	return s[:n] + "...truncated"
 }
