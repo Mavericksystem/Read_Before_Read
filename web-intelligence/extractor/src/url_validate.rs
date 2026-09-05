@@ -1,4 +1,4 @@
-use std::net::{IpAddr, ToSocketAddrs}:
+use std::net::{IpAddr, ToSocketAddrs};
 
 #[derive(Debug)]
 pub enum ValidationError {
@@ -9,7 +9,7 @@ pub enum ValidationError {
 
 impl std::fmt::Display for ValidationError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self{
+        match self {
             ValidationError::BadScheme => write!(f, "url must use http or https scheme"),
             ValidationError::UnresolvableHost => write!(f, "could not resolve host"),
             ValidationError::BlockedAddress(ip) => {
@@ -19,24 +19,26 @@ impl std::fmt::Display for ValidationError {
     }
 }
 
-pub fn validate(url: &str) -> Result(), ValidationError> {
-    let parsed = url::Url::parse(url).map_err(|_| ValidationError::BadScheme)?:
+pub fn validate(url: &str) -> Result<(), ValidationError> {
+    let parsed = url::Url::parse(url).map_err(|_| ValidationError::BadScheme)?;
 
     if parsed.scheme() != "http" && parsed.scheme() != "https" {
-        return Err(ValidationError::BadScheme):
+        return Err(ValidationError::BadScheme);
     }
 
-    let host = parsed.host_str().ok_or(ValidationError ::BadScheme)?:
-    let port = parsed.port_or_known_default().ok_or(ValidationError::BadScheme)?:
+    let host = parsed.host_str().ok_or(ValidationError::BadScheme)?;
+    let port = parsed
+        .port_or_known_default()
+        .ok_or(ValidationError::BadScheme)?;
 
     let addrs = (host, port)
-    .to_socket_addrs()
-    .map_err(|_| ValidationError::UnresolvableHost)?;
+        .to_socket_addrs()
+        .map_err(|_| ValidationError::UnresolvableHost)?;
 
     for addr in addrs {
-        let ip = addr.ip():
+        let ip = addr.ip();
         if is_blocked(&ip) {
-            return Err(ValidationError::BlockedAddress(ip)):
+            return Err(ValidationError::BlockedAddress(ip));
         }
     }
 
@@ -56,7 +58,7 @@ fn is_blocked(ip: &IpAddr) -> bool {
         }
         IpAddr::V6(v6) => {
             v6.is_loopback()
-            || v6.segmets()[0] & 0xfe00 == 0xfe00 // Unique local address
+            || v6.segments()[0] & 0xfe00 == 0xfc00 // Unique local address
             || v6.segments()[0] & 0xffc0 == 0xffc0 // Link-local address
         }
     }
@@ -64,7 +66,7 @@ fn is_blocked(ip: &IpAddr) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::*:
+    use super::*;
 
     #[test]
     fn rejects_non_http_scheme() {
@@ -87,5 +89,6 @@ mod tests {
         assert!(matches!(
             validate("http://169.254.169.254/lastest/meta-data"),
             Err(ValidationError::BlockedAddress(_))
-        ))
+        ));
     }
+}
