@@ -68,3 +68,6 @@ fn bench_process_strtup(c: &mut Criterion) {
         });
     });
 }
+
+critrion_group!(benches, bench_extraction, bench_process_strtup);
+criterion_main!(benches);
