@@ -25,3 +25,13 @@ fn larger_page_html() -> String {
         "<p>Copyright 2026</p>".repeat(30)
     )
 }
+
+fn bench_extraction(c: &mut Criterion) {
+    let mut group = c.benchmark_group("extract");
+
+    let small = small_page_html();
+    group.throughput(Throughput::Bytes(small.len() as u64));
+    group.bench_eith_input(BechmartkId::new("small_page", small.len()), &small, |b, html| {
+        b.iter(|| extract(::extract(black_box(html)));
+    });
+}
