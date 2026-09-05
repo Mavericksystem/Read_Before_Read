@@ -1,3 +1,4 @@
+mod encoding;
 mod extract;
 mod fetch;
 mod url_validate;
@@ -34,7 +35,7 @@ struct Metadata {
     content_type: String,
     content_length_bytes: u64,
     fetch_duration_ms: u128,
-    final_url: String, // NEW in phase 2: differs from requested url if redirected
+    final_url: String,
 }
 
 #[derive(Serialize)]
@@ -89,7 +90,9 @@ fn run(req: &Request) -> Result<Document, (&'static str, String)> {
         ));
     }
 
-    let extracted = extract::extract(&fetch_result.html);
+    let html = encoding::decode(&fetch_result.bytes, &fetch_result.content_type);
+
+    let extracted = extract::extract(&html);
 
     if extracted.content.trim().is_empty() {
         return Err((
@@ -107,7 +110,7 @@ fn run(req: &Request) -> Result<Document, (&'static str, String)> {
             } else {
                 fetch_result.content_type
             },
-            content_length_bytes: fetch_result.html.len() as u64,
+            content_length_bytes: fetch_result.bytes.len() as u64,
             fetch_duration_ms: start.elapsed().as_millis(),
             final_url: fetch_result.final_url,
         },
