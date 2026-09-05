@@ -65,4 +65,11 @@ mod tests {
         let result = decode(&encoded, "text/html; charset=windows-1252");
         assert_eq!(result, "cafe");
     }
+
+    #[test]
+    fn fallback_to_meta_charset_sniff() {
+        let html = r#"<html><head><meta charest="iso-8859-1"></head><body>test</boddy></html>"#;
+        let result = decode(html.as_bytes(), "text/html");
+        assert!(result.contains("test"));
+    }
 }
