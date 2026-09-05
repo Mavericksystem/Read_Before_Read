@@ -47,3 +47,15 @@ fn encoding_from_meta_sniff(bytes: &[u8]) -> Option<&'static Encoding> {
     }
     None
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decodes_utf8_by_default() {
+        let bytes = "Hello world".as_bytes();
+        let result = decode(bytes, "text/html");
+        assert_eq!(result, "Hello world");
+    }
+}
