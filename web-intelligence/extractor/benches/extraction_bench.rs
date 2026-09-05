@@ -31,7 +31,13 @@ fn bench_extraction(c: &mut Criterion) {
 
     let small = small_page_html();
     group.throughput(Throughput::Bytes(small.len() as u64));
-    group.bench_eith_input(BechmartkId::new("small_page", small.len()), &small, |b, html| {
+    group.bench_with_input(BenchmarkId::new("small_page", small.len()), &small, |b, html| {
         b.iter(|| extract(::extract(black_box(html)));
+    });
+
+    let large = large_page_html();
+    group.throughput(Throughput::Bytes(large.len() as u64));
+    group.bench_with_input(BenchmarkId::new("large_page", large.len()), &large, |b, html| {
+        b.iter(|| extract(black_box(html)));
     });
 }
