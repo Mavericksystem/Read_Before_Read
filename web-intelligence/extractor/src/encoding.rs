@@ -11,3 +11,12 @@ pub fn decode(bytes: &[u8], content_type_header: &str) -> String {
 
     decode_with(bytes, encoding_rs::UTF_8)
 }
+
+
+fn decode_with(bytes): &[u8], encoding: &'static Encoding) -> String {
+    let (cow, _actual_encoding_used, had_errors) = encoding.decode(bytes);
+    if had_errors {
+
+    }
+    cow.into_owned()
+}
