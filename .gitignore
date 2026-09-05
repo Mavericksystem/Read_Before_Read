@@ -1,3 +1,9 @@
 /target
 fake.go
 .env
+
+/web-intelligence/backend/bin/
+/web-intelligence/backend/package-lock.json
+/web-intelligence/extractor/target/
+/web-intelligence/frontend/dist/
+/web-intelligence/frontend/node_modules/
