@@ -56,5 +56,15 @@ fn bench_process_strtup(c: &mut Criterion) {
                 .stderr(std::process::Stdio::null())
                 .spawn()
                 .expect("Failed to spawn extractor binary");
-        })
+
+            let req = r#"{"url""not-a-calid-url", "max_response_bytes", "timeout_ms":100}"#;
+            child
+                .stdin
+                .as_mut()
+                .unwrap()
+                .write_all(req.as_bytes())
+                .unwrap();
+            let _ = child.wait_with_output().unwrap();
+        });
+    });
 }
