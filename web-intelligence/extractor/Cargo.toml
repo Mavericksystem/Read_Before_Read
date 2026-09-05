@@ -19,3 +19,10 @@ opt-level = 3
 [lib]
 name = "extractor_lib"
 path = "src/lib.rs"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "extraction_bench"
+harness = false
