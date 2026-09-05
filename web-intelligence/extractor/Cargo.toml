@@ -15,3 +15,7 @@ scraper = "0.19"
 
 [profile.release]
 opt-level = 3
+
+[lib]
+name = "extractor_lib"
+path = "src/lib.rs"
