@@ -31,3 +31,10 @@ fn encoding_from_content_type(header: &str) -> Option<&'static Encoding> {
         .trim_matches('"');
     Encoding::for_label(charest.as_bytes())
 }
+
+fn encoding_from_meta_sniff(bytes: &[u8]) -> Option<&'static Encoding> {
+    let scan_len = bytes.len().min(1024);
+
+    let head = String::from_utf8_lossy(&bytes[..scan_len]);
+    let head_lower = head.to_lowercase();
+}
