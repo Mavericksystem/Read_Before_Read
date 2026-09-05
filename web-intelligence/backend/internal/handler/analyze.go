@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
-
 	"web-intelligence/backend/internal/extractor"
 	"web-intelligence/backend/internal/nim"
 )
@@ -41,7 +41,7 @@ type errorResponse struct {
 }
 
 type errBody struct {
-	category  string `json:"category"`
+	Category  string `json:"category"`
 	Message   string `json:"message"`
 	RequestID string `json:"request_id"`
 }
@@ -69,7 +69,7 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel() := context.WithTimeout(r.Context(), requestDeadline)
+	ctx, cancel := context.WithTimeout(r.Context(), requestDeadline)
 	defer cancel()
 
 	fetchStart := time.Now()
@@ -94,6 +94,7 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	nimDuration := time.Since(nimStart)
 
 	if err != nil {
+		log.Printf("nim error: %v", err)
 		writeError(w, http.StatusBadGateway, "ai", "AI analysis failed", requestID)
 		return
 	}
@@ -142,7 +143,5 @@ func writeError(w http.ResponseWriter, status int, category, message, requestID 
 }
 
 func newRequestID() string {
-	// TODO(phase-1-followup): swap for a real UUID lib (e.g. google/uuid);
-	// this is a placeholder to avoid pulling a dependency for Phase 1.
 	return time.Now().Format("20060102150405.000000")
 }
