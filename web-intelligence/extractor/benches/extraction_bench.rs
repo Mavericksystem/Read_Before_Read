@@ -50,5 +50,11 @@ fn bench_process_strtup(c: &mut Criterion) {
     c.bench_function("subprocess_spawn_overhead", |b| {
         b.iter(|| {
             use std::io::Write;
+            let mut child = Command::new(binary)
+                .stdin(std::process::Stdio::piped())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::null())
+                .spawn()
+                .expect("Failed to spawn extractor binary");
         })
 }
