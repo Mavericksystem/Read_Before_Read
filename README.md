@@ -122,3 +122,63 @@ This project is being used to explore:
 - Production deployment
 
 > **Build → understand → measure → improve.**
+
+## Current Folder Structure
+
+```text
+rust_pro/
+├── .env
+├── .gitignore
+├── README.md
+├── fake.go
+├── target/                         # Workspace build output
+└── web-intelligence/
+      ├── backend/
+      │   ├── bin/                    # Compiled Rust extractor binary
+      │   ├── cmd/
+      │   │   └── server/
+      │   │       └── main.go         # Go HTTP server entry point
+      │   ├── internal/
+      │   │   ├── extractor/
+      │   │   │   └── extractor.go    # Rust process orchestration
+      │   │   ├── handler/
+      │   │   │   └── analyze.go      # Analyze API handler
+      │   │   └── nim/
+      │   │       └── nim.go          # NVIDIA NIM client
+      │   ├── go.mod
+      │   └── package-lock.json
+      ├── docs/
+      │   └── .gitkeep
+      ├── extractor/
+      │   ├── benches/
+      │   │   └── extraction_bench.rs
+      │   ├── src/
+      │   │   ├── encoding.rs
+      │   │   ├── extract.rs
+      │   │   ├── fetch.rs
+      │   │   ├── lib.rs
+      │   │   ├── main.rs
+      │   │   └── url_validate.rs
+      │   ├── tests/
+      │   │   └── extract_test.rs
+      │   ├── Cargo.toml
+      │   └── Cargo.lock
+      ├── frontend/
+      │   ├── src/
+      │   │   ├── App.tsx
+      │   │   └── main.tsx
+      │   ├── index.html
+      │   ├── package.json
+      │   ├── package-lock.json
+      │   ├── tsconfig.json
+      │   ├── tsconfig.app.json
+      │   ├── tsconfig.node.json
+      │   └── vite.config.ts
+      ├── infrastructure/
+      │   └── .gitkeep
+      └── tests/
+            └── .gitkeep
+```
+
+Generated directories such as `frontend/node_modules`, `frontend/dist`, and
+`extractor/target` are omitted from the detailed source tree.
