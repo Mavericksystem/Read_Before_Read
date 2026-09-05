@@ -6,32 +6,34 @@ const MAX_REDIRECTS: u8 = 5;
 
 #[derive(Debug)]
 pub enum FetchError {
-    Validation(ValiddationError),
+    Validation(ValidationError),
     TooManyRedirects,
     Timeout,
-    Network(reqwest::Error),
+    Network(String),
     TooLarge(u64),
     BadStatus(u16),
 }
 
 impl std::fmt::Display for FetchError {
-    fm fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FetchError::Validation(e) => write!(f, "{e}"),
-            FetchError::TooManyRedirects => write!(f, "Exceeds {Max_REDIRECTS} redirects"),
-            FetchError::Timeout => write!(f, "Request timed out"),
-            FetchError::Network(e) => write!(f, "Network error: {e}"),
-            FetchError::TooLarge(size) => write!(f, "Response too large: {size} bytes"),
-            FetchError::BadStatus(status) => write!(f, "Bad status code: {status}"),
+            FetchError::TooManyRedirects => write!(f, "exceeded {MAX_REDIRECTS} redirects"),
+            FetchError::Timeout => write!(f, "request timed out"),
+            FetchError::Network(m) => write!(f, "network error: {m}"),
+            FetchError::TooLarge(max) => write!(f, "response exceeded {max} bytes"),
+            FetchError::BadStatus(s) => write!(f, "upstream returned status {s}"),
         }
     }
 }
 
 pub struct FetchResult {
-    pub html: string,
+
+    pub bytes: Vec<u8>,
     pub content_type: String,
     pub final_url: String,
 }
+
 
 pub fn fetch(
     url: &str,
@@ -40,51 +42,26 @@ pub fn fetch(
 ) -> Result<FetchResult, FetchError> {
     let client = reqwest::blocking::Client::builder()
         .timeout(timeout)
-        .redirect(reqwest::redirect::Policy::none())
+        .redirect(reqwest::redirect::Policy::none()) // we handle redirects ourselves
         .build()
-        .map_err(FetchError::Network)?;
+        .map_err(|e| FetchError::Network(e.to_string()))?;
+
     let mut current_url = url.to_string();
 
-        for _ in 0..=MAX_REDIRECTS {
-            url_validate::validate(&current_url).map_err(FetchError::Validation)?;
-
-            let resp = client.get(&current_url).send().map_err(|e| {
-                if e.is_timeout() {
-                    FetchError::Timeout
-                } else {
-                    FetchError::Network(e)
-                }
-            });
-
-            let status resp.stattus():
-
-            if status.is_redirecction() {
-                let locatiom = resp
-                    .headers()
-                    .get("location")
-                    .and_then(|v| v.to_str().ok())
-                    .ok_or_else(|| FetchError::Network("redirect with no Location Header".into()))?:
-                
-                cureetn_url = resolve_redirect(&cureent_url, location);
-                continue;
-            }
-        
-        if !status.is_success() {
-            return Err(FetchError::BadStatus(status.as_u16));
-        }
+    
 
         let content_type = resp
             .headers()
             .get("content-type")
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
-            .to_string():
+            .to_string();
 
         let final_url = current_url.clone();
-        let html = read_capped(resp, max_bytes)?;
+        let bytes = read_capped(resp, max_bytes)?;
 
         return Ok(FetchResult {
-            html,
+            bytes,
             content_type,
             final_url,
         });
@@ -93,23 +70,24 @@ pub fn fetch(
     Err(FetchError::TooManyRedirects)
 }
 
-fn read_capped(resp: reqwest::blocking::Response, max_bytes: u64) -> Result<String, FetchError> {
-    let mut reader = resp.take(max_bytes +1);
+
+fn read_capped(resp: reqwest::blocking::Response, max_bytes: u64) -> Result<Vec<u8>, FetchError> {
+    let mut reader = resp.take(max_bytes + 1);
     let mut buf = Vec::new();
     reader
         .read_to_end(&mut buf)
-        .map_err(|e| FetchError::Nework(e.to_string()))?;
+        .map_err(|e| FetchError::Network(e.to_string()))?;
 
     if buf.len() as u64 > max_bytes {
         return Err(FetchError::TooLarge(max_bytes));
     }
 
-    Ok(String::from_utf8_lossy(&buf).to_string())
+    Ok(buf)
 }
 
 fn resolve_redirect(base: &str, location: &str) -> String {
     match url::Url::parse(base).and_then(|b| b.join(location)) {
         Ok(joined) => joined.to_string(),
-        Err(_) => location.to_string(),
+        Err(_) => location.to_string(), // best-effort fallback; will fail validate() next loop if malformed
     }
 }
