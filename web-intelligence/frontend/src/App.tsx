@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./App.css";
 
 interface AnalyzeSuccess {
     status: "success";
@@ -47,27 +48,60 @@ export default function App() {
     }
 
     return (
-        <div style={{ fontFamily: "monospace", padding: "2rem", maxWidth: 700 }}>
-            <h1>Web Intelligence — Phase 1 vertical slice</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="url"
-                    required
-                    placeholder="https://example.com/article"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    style={{ width: "100%", padding: "0.5rem" }}
-                />
-                <button type="submit" disabled={loading} style={{ marginTop: "0.5rem" }}>
-                    {loading ? "Analyzing..." : "Analyze"}
-                </button>
-            </form>
+        <main className="app-shell">
+            <nav className="topbar">
+                <a className="brand" href="/" aria-label="Web Intelligence home">
+                    <span className="brand-mark">WI</span>
+                    <span>Web Intelligence</span>
+                </a>
+                <span className="status-pill"><span className="status-dot" /> AI research assistant</span>
+            </nav>
 
-            {response && (
-                <pre style={{ marginTop: "1rem", whiteSpace: "pre-wrap", background: "#f4f4f4", padding: "1rem" }}>
-                    {JSON.stringify(response, null, 2)}
-                </pre>
-            )}
-        </div>
+            <section className="hero">
+                <p className="eyebrow">Read less. Understand more.</p>
+                <h1>Ask any webpage<br /><em>a better question.</em></h1>
+                <p className="hero-copy">Paste an article URL and get a clear, useful answer without digging through every paragraph.</p>
+            </section>
+
+            <section className="workspace" aria-label="Webpage analyzer">
+                <form className="analyzer-form" onSubmit={handleSubmit}>
+                    <label htmlFor="url">Page to investigate</label>
+                    <div className="input-row">
+                        <div className="url-input-wrap">
+                            <span className="url-icon" aria-hidden="true">↗</span>
+                            <input
+                                id="url"
+                                type="url"
+                                required
+                                placeholder="https://example.com/article"
+                                value={url}
+                                onChange={(e) => setUrl(e.target.value)}
+                            />
+                        </div>
+                        <button type="submit" disabled={loading}>
+                            {loading ? <><span className="spinner" /> Reading</> : <>Analyze <span aria-hidden="true">→</span></>}
+                        </button>
+                    </div>
+                    <p className="form-hint">We extract the page content temporarily and do not store your URL.</p>
+                </form>
+
+                {loading && <div className="loading-card"><span className="loader-line" /><strong>Reading the page</strong><span>Extracting the useful bits and preparing your answer...</span></div>}
+
+                {response?.status === "success" && (
+                    <article className="result-card">
+                        <div className="result-header"><span className="result-label"><span className="check">✓</span> Analysis complete</span><span>{response.meta.total_duration_ms} ms</span></div>
+                        <h2>{response.result.title || "Untitled page"}</h2>
+                        <p className="answer">{response.result.nim_answer}</p>
+                        <div className="result-footer"><span>Powered by Nemotron</span><span>Request {response.meta.request_id.slice(0, 8)}</span></div>
+                    </article>
+                )}
+
+                {response?.status === "error" && (
+                    <div className="error-card" role="alert"><strong>We couldn't analyze that page.</strong><span>{response.error.message}</span></div>
+                )}
+            </section>
+
+            <footer><span>WEB INTELLIGENCE / 2026</span><span>Turn pages into perspective.</span></footer>
+        </main>
     );
 }
