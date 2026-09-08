@@ -1,6 +1,7 @@
 package pool
 
 import (
+	"context"
 	"fmt"
 	"sync"
 )
@@ -39,4 +40,27 @@ func New(binaryPath string, size int) (*Pool, error) {
 	}
 
 	return p, nil
+}
+
+func (p *Pool) Dispatch(ctx context.Context, reqLine []byte) ([]byte, error) {
+	var w *worker
+	select {
+	case w = <-p.free:
+		// got one
+	case <-ctx.Done():
+		return nil, fmt.Errorf("pool: %w waiting for a free worker", ctx.Err())
+	}
+
+	resp, err := w.send(ctx, reqLine)
+	if err != nil || w.isDead() {
+
+		go p.replace(w)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		p.free <- w
+	}
+
+	return resp, nil
 }
