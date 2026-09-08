@@ -113,6 +113,10 @@ func (p *Pooled) dispatch(ctx context.Context, req Request) (*Document, error) {
 	return resp.Document, nil
 }
 
+func (p *Pooled) Shutdown() {
+	p.pool.Shutdown()
+}
+
 func truncate(s string, n int) string {
 	if len(s) <= n {
 		return s
