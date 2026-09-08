@@ -39,3 +39,25 @@ func newWorker(binaryPath string) (*worker, error) {
 		stdout: bufio.NewReader(stdoutPipe),
 	}, nil
 }
+
+
+func (w *worker) send(ctx context.Context, reqLine []byte) ([]byte, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	if w.dead {
+		return nil, fmt.Errorf("worker: process already dead")
+	}
+
+	if _, err := w.stdin.Write(reqLine); err != nil {
+		w.dead = true
+		return nil, fmt.Errorf("worker: write job: %w", err)
+	}
+	if err := w.stdin.WriteByte('\n'); err != nil {
+		w.dead = true
+		return nil, fmt.Errorf("worker: write newline: %w", err)
+	}
+	if err := w.stdin.Flush(); err != nil {
+		w.dead = true
+		return nil, fmt.Errorf("worker: flush: %w", err)
+	}
