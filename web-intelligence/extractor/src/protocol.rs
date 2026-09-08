@@ -26,3 +26,11 @@ pub fn read_job<T: DeserializeOwned>(
     }
 
 }
+
+pub fn write_response<T: Serialize>(writer: &mut impl Write, value: &T) -> io::result<()> {
+    let mut out = serde_json::to_string(value)
+        .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))?;
+    out.push('\n');
+    writer.write_all(out.as_bytes())?;
+    writer.flush()
+}
