@@ -47,8 +47,12 @@ type errBody struct {
 }
 
 type Analyzer struct {
-	NimClient *nim.Client
+	NimClient   *nim.ThrottledClient
+	Extractor   *extractor.Pooled
+	Browser     *browser.Pool
+	Admission   chan struct{} 
 }
+
 
 func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -58,7 +62,7 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "validation", "only POST is supported", requestID)
 		return
 	}
-
+``
 	var req analyzeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "validation", "malformed JSON body", requestID)
@@ -72,47 +76,21 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), requestDeadline)
 	defer cancel()
 
+	select {
+	case a.Admission <- struct{}{}:
+		defer func() { <-a.Admission }()
+	default:
+		writeError(w, http.StatusServiceUnavailable, "overloaded", "service at capacity, try again shortly", requestID)
+		return
+	}
+
 	fetchStart := time.Now()
-	doc, err := extractor.Run(ctx, extractor.Request{
+	doc, err := a.Extractor.Run(ctx, extractor.Request{
 		URL:              req.URL,
 		MaxResponseBytes: maxResponseBytes,
 		TimeoutMs:        extractor.DefaultTimeout.Milliseconds(),
 	})
-	fetchDuration := time.Since(fetchStart)
 
-	if err != nil {
-		if extErr, ok := err.(*extractor.Error); ok {
-			writeError(w, statusFor(extErr.Category), extErr.Category, extErr.Message, requestID)
-			return
-		}
-		writeError(w, http.StatusInternalServerError, "internal", "extraction failed", requestID)
-		return
-	}
-
-	nimStart := time.Now()
-	answer, err := a.NimClient.Analyze(ctx, doc.Title, doc.Content, req.Question)
-	nimDuration := time.Since(nimStart)
-
-	if err != nil {
-		log.Printf("nim error: %v", err)
-		writeError(w, http.StatusBadGateway, "ai", "AI analysis failed", requestID)
-		return
-	}
-
-	resp := successResponse{Status: "success"}
-	resp.Result.Title = doc.Title
-	resp.Result.NimAnswer = answer
-	resp.Meta = meta{
-		RequestID:       requestID,
-		TotalDurationMs: time.Since(start).Milliseconds(),
-		FetchDurationMs: fetchDuration.Milliseconds(),
-		NimDurationMs:   nimDuration.Milliseconds(),
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(resp)
-}
 
 func statusFor(category string) int {
 	switch category {
