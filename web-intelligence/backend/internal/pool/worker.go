@@ -2,6 +2,7 @@ package pool
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os/exec"
 	"sync"
@@ -40,7 +41,6 @@ func newWorker(binaryPath string) (*worker, error) {
 	}, nil
 }
 
-
 func (w *worker) send(ctx context.Context, reqLine []byte) ([]byte, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -61,3 +61,27 @@ func (w *worker) send(ctx context.Context, reqLine []byte) ([]byte, error) {
 		w.dead = true
 		return nil, fmt.Errorf("worker: flush: %w", err)
 	}
+
+	type result struct {
+		line []byte
+		err  error
+	}
+	resultCh := make(chan result, 1)
+
+	go func() {
+		line, err := w.stdout.ReadBytes('\n')
+		resultCh <- result{line: line, err: err}
+	}()
+
+	select {
+	case <-ctx.Done():
+		w.dead = true // caller must kill() this worker; it may still be blocked reading
+		return nil, ctx.Err()
+	case res := <-resultCh:
+		if res.err != nil {
+			w.dead = true
+			return nil, fmt.Errorf("worker: read response: %w", res.err)
+		}
+		return res.line, nil
+	}
+}
