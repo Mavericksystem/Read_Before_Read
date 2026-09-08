@@ -37,6 +37,7 @@ pub fn fetch(url: &str, max_bytes: u64, timeout: Duration) -> Result<FetchResult
     let client = reqwest::blocking::Client::builder()
         .timeout(timeout)
         .redirect(reqwest::redirect::Policy::none()) // we handle redirects ourselves
+        .user_agent("Mozilla/5.0 (compatible: WebIntelligenceBot/0.1")
         .build()
         .map_err(|e| FetchError::Network(e.to_string()))?;
 
