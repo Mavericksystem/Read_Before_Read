@@ -85,3 +85,13 @@ func (w *worker) send(ctx context.Context, reqLine []byte) ([]byte, error) {
 		return res.line, nil
 	}
 }
+
+func (w *worker) kill() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.dead = true
+	if w.cmd.Process != nil {
+		_ = w.cmd.Process.Kill()
+	}
+	_ = w.cmd.Wait()
+}
