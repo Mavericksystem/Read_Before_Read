@@ -1,10 +1,8 @@
-use serde::de::Derializarion;
-user serde::Serialize;
-use std::io::{self, Read};
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use std::io::{self, BufRead, Write};
 
-pub fn read_job<T: DeserializeOwned>(
-    reader: &mut impl BufRead,
-) -> io::Result<Option<T>> {
+pub fn read_job<T: DeserializeOwned>(reader: &mut impl BufRead) -> io::Result<Option<T>> {
     let mut line = String::new();
     let bytes_read = reader.read_line(&mut line)?;
 
@@ -21,13 +19,12 @@ pub fn read_job<T: DeserializeOwned>(
         Ok(job) => Ok(Some(job)),
         Err(e) => Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format("malformed job JSON: {e}"),
+            format!("malformed job JSON: {e}"),
         )),
     }
-
 }
 
-pub fn write_response<T: Serialize>(writer: &mut impl Write, value: &T) -> io::result<()> {
+pub fn write_response<T: Serialize>(writer: &mut impl Write, value: &T) -> io::Result<()> {
     let mut out = serde_json::to_string(value)
         .map_err(|e| io::Error::new(io::ErrorKind::InvalidData, e.to_string()))?;
     out.push('\n');
