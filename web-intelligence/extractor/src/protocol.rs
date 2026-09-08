@@ -9,7 +9,7 @@ pub fn read_job<T: DeserializeOwned>(
     let bytes_read = reader.read_line(&mut line)?;
 
     if bytes_read == 0 {
-        retrun Ok(None);
+        return Ok(None);
     }
 
     let trimmed = line.trim();
@@ -17,6 +17,12 @@ pub fn read_job<T: DeserializeOwned>(
         return read_job(reader);
     }
 
-    
+    match serde_json::from_str::<T>(trimmed) {
+        Ok(job) => Ok(Some(job)),
+        Err(e) => Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format("malformed job JSON: {e}"),
+        )),
+    }
 
 }
