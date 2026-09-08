@@ -148,6 +148,8 @@ func statusFor(category string) int {
 		return http.StatusUnprocessableEntity
 	case "fetch_failure":
 		return http.StatusBadGateway
+	case "overloaded":
+		return http.StatusServiceUnavailable
 	default:
 		return http.StatusInternalServerError
 	}
