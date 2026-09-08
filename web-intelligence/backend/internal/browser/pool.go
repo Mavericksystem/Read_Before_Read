@@ -30,3 +30,24 @@ func New(size int) (*Pool, error) {
 			chromedp.Flag("no-sandbox", true), // required in many containerized/local setups
 		)...,
 	)
+
+	p := &Pool{
+		allocCtx:    allocCtx,
+		allocCancel: allocCancel,
+		free:        make(chan context.Context, size),
+		cancels:     make([]context.CancelFunc, 0, size),
+	}
+
+	for i := 0; i < size; i++ {
+		tabCtx, tabCancel := chromedp.NewContext(allocCtx)
+
+		if err := chromedp.Run(tabCtx); err != nil {
+			p.Shutdown()
+			return nil, fmt.Errorf("browser pool: starting tab %d/%d: %w", i+1, size, err)
+		}
+		p.cancels = append(p.cancels, tabCancel)
+		p.free <- tabCtx
+	}
+
+	return p, nil
+}
