@@ -3,6 +3,7 @@ package pool
 import (
 	"context"
 	"fmt"
+	"log"
 	"sync"
 )
 
@@ -63,4 +64,23 @@ func (p *Pool) Dispatch(ctx context.Context, reqLine []byte) ([]byte, error) {
 	}
 
 	return resp, nil
+}
+
+func (p *Pool) replace(w *worker) {
+	w.kill()
+
+	p.mu.Lock()
+	down := p.shutdown
+	p.mu.Unlock()
+	if down {
+		return
+	}
+
+	nw, err := newWorker(p.binaryPath)
+	if err != nil {
+
+		log.Printf("pool: failed to replace dead worker: %v (pool capacity reduced)", err)
+		return
+	}
+	p.free <- nw
 }
