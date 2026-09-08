@@ -1,10 +1,11 @@
 mod encoding;
 mod extract;
 mod fetch;
+mod protocol;
 mod url_validate;
 
 use serde::{Deserialize, Serialize};
-use std::io::{self, Read, Write};
+use std::io::{self, BufRead};
 use std::time::Duration;
 
 #[derive(Deserialize)]
@@ -45,25 +46,36 @@ struct ErrorBody {
 }
 
 fn main() {
-    let mut input = String::new();
-    if let Err(e) = io::stdin().read_to_string(&mut input) {
-        emit_error("internal", &format!("failed to read stdin: {e}"));
-        std::process::exit(1);
-    }
+    let stdin = io::stdin();
+    let mut reader = stdin.lock();
+    let stdout = io::stdout();
+    let mut writer = stdout.lock();
 
-    let req: Request = match serde_json::from_str(&input) {
-        Ok(r) => r,
-        Err(e) => {
-            emit_error("invalid_url", &format!("malformed request JSON: {e}"));
-            std::process::exit(1);
-        }
-    };
+    loop {
+        let job = match protocol::read_job::<Request>(&mut reader) {
+            Ok(Some(req)) => req,
+            Ok(None) => break,
+            Err(e) => {
+                let resp = Response::Error {
+                    error: ErrorBody {
+                        category: "invalid_url",
+                        message: format!("malformed request JSON: {e}"),
+                    },
+                };
+                let _ = protocol::write_response(&mut writer, &resp);
+                continue;
+            }
+        };
 
-    match run(&req) {
-        Ok(doc) => print_json(&Response::Ok { document: doc }),
-        Err((category, message)) => {
-            emit_error(category, &message);
-            std::process::exit(1);
+        let resp = match run(&job) {
+            Ok(doc) => Response::Ok { document: doc },
+            Err((category, message)) => Response::Error {
+                error: ErrorBody { category, message },
+            },
+        };
+
+        if protocol::write_response(&mut writer, &resp).is_err() {
+            break;
         }
     }
 }
@@ -129,23 +141,4 @@ fn map_fetch_error(e: fetch::FetchError) -> (&'static str, String) {
         FetchError::BadStatus(_) => "fetch_failed",
     };
     (category, msg)
-}
-
-fn emit_error(category: &'static str, message: &str) {
-    print_json(&Response::Error {
-        error: ErrorBody {
-            category,
-            message: message.to_string(),
-        },
-    });
-}
-
-fn print_json<T: Serialize>(v: &T) {
-    let out = serde_json::to_string(v).unwrap_or_else(|_| {
-        r#"{"status":"error","error":{"category":"internal","message":"failed to serialize response"}}"#
-            .to_string()
-    });
-    let mut stdout = io::stdout();
-    let _ = stdout.write_all(out.as_bytes());
-    let _ = stdout.flush();
 }
