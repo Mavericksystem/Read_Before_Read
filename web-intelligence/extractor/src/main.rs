@@ -5,15 +5,8 @@ mod protocol;
 mod url_validate;
 
 use serde::{Deserialize, Serialize};
-use std::io::{self, BufRead};
+use std::io;
 use std::time::Duration;
-
-#[derive(Deserialize)]
-struct Request {
-    url: String,
-    max_response_bytes: u64,
-    timeout_ms: u64,
-}
 
 #[derive(Serialize)]
 #[serde(tag = "status")]
