@@ -10,7 +10,7 @@ import (
 	"web-intelligence/backend/internal/nim"
 )
 
-const requestDeadline = 30 * time.Second
+const requestDeadline = 75 * time.Second
 
 const maxResponseBytes = 5 * 1024 * 1024
 
