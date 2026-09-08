@@ -28,7 +28,7 @@ func NewClient() (*Client, error) {
 	}
 	return &Client{
 		apiKey:     key,
-		httpClient: &http.Client{Timeout: 25 * time.Second},
+		httpClient: &http.Client{Timeout: 60 * time.Second},
 	}, nil
 }
 
