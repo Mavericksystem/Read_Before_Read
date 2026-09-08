@@ -95,3 +95,9 @@ func (w *worker) kill() {
 	}
 	_ = w.cmd.Wait()
 }
+
+func (w *worker) isDead() bool {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.dead
+}
