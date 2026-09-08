@@ -2,6 +2,7 @@ package extractor
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 	"web-intelligence/backend/internal/pool"
@@ -74,6 +75,42 @@ func (p *Pooled) RunFromHTML(ctx context.Context, html, finalURL string) (*Docum
 		PrerenderedHTML: html,
 		FinalURL:        finalURL,
 	})
+}
+
+func (p *Pooled) dispatch(ctx context.Context, req Request) (*Document, error) {
+	payload, err := json.Marshal(req)
+	if err != nil {
+		return nil, &Error{Category: "internal", Message: "failed to marshal request: " + err.Error()}
+	}
+
+	respLine, err := p.pool.Dispatch(ctx, payload)
+	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			return nil, &Error{Category: "timeout", Message: "extractor exceeded deadline"}
+		}
+		return nil, &Error{Category: "internal", Message: fmt.Sprintf("pool dispatch failed: %v", err)}
+	}
+
+	var resp rustResponse
+	if err := json.Unmarshal(respLine, &resp); err != nil {
+		return nil, &Error{
+			Category: "internal",
+			Message:  fmt.Sprintf("malformed extractor output: %v, raw:%s", err, truncate(string(respLine), 500)),
+		}
+	}
+
+	if resp.Status == "error" {
+		if resp.Error == nil {
+			return nil, &Error{Category: "internal", Message: "extractor reported error status with no error body"}
+		}
+		return nil, &Error{Category: resp.Error.Category, Message: resp.Error.Message}
+	}
+
+	if resp.Document == nil {
+		return nil, &Error{Category: "internal", Message: "extractor reported ok status with no document"}
+	}
+
+	return resp.Document, nil
 }
 
 func truncate(s string, n int) string {
