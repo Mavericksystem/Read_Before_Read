@@ -60,3 +60,14 @@ func (p *Pool) Acquire(ctx context.Context) (context.Context, error) {
 		return nil, fmt.Errorf("browser pool: %w waiting for a free tab", ctx.Err())
 	}
 }
+
+func (p *Pool) Release(tabCtx context.Context) {
+	p.free <- tabCtx
+}
+
+func (p *Pool) Shutdown() {
+	for _, cancel := range p.cancels {
+		cancel()
+	}
+	p.allocCancel()
+}
