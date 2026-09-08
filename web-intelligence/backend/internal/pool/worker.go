@@ -2,12 +2,10 @@ package pool
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"os/exec"
 	"sync"
 )
-
 
 type worker struct {
 	mu     sync.Mutex
@@ -28,3 +26,16 @@ func newWorker(binaryPath string) (*worker, error) {
 	if err != nil {
 		return nil, fmt.Errorf("worker: stdout pipe: %w", err)
 	}
+
+	cmd.Stderr = nil
+
+	if err := cmd.Start(); err != nil {
+		return nil, fmt.Errorf("worker: start: %w", err)
+	}
+
+	return &worker{
+		cmd:    cmd,
+		stdin:  bufio.NewWriter(stdinPipe),
+		stdout: bufio.NewReader(stdoutPipe),
+	}, nil
+}
