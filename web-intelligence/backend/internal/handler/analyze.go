@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"web-intelligence/backend/internal/browser"
 	"web-intelligence/backend/internal/extractor"
 	"web-intelligence/backend/internal/nim"
 )
@@ -47,12 +48,11 @@ type errBody struct {
 }
 
 type Analyzer struct {
-	NimClient   *nim.ThrottledClient
-	Extractor   *extractor.Pooled
-	Browser     *browser.Pool
-	Admission   chan struct{} 
+	NimClient *nim.ThrottledClient
+	Extractor *extractor.Pooled
+	Browser   *browser.Pool
+	Admission chan struct{}
 }
-
 
 func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
@@ -62,7 +62,7 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "validation", "only POST is supported", requestID)
 		return
 	}
-``
+	``
 	var req analyzeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "validation", "malformed JSON body", requestID)
@@ -91,6 +91,52 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		TimeoutMs:        extractor.DefaultTimeout.Milliseconds(),
 	})
 
+	if err != nil {
+		if extErr, ok := err.(*extractor.Error); ok && extErr.Category == "no_content_extracted" {
+			html, renderErr := a.Browser.Render(ctx, req.URL, 15*time.Second)
+			if renderErr == nil {
+				doc, err = a.Extractor.RunFromHTML(ctx, html, req.URL)
+			}
+			// If renderErr != nil, fall through with the original
+			// no_content_extracted error below — don't mask a real
+			// render failure as success.
+		}
+	}
+	fetchDuration := time.Since(fetchStart)
+
+	if err != nil {
+		if extErr, ok := err.(*extractor.Error); ok {
+			writeError(w, statusFor(extErr.Category), extErr.Category, extErr.Message, requestID)
+			return
+		}
+		writeError(w, http.StatusInternalServerError, "internal", "extraction failed", requestID)
+		return
+	}
+
+	nimStart := time.Now()
+	answer, err := a.NimClient.Analyze(ctx, doc.Title, doc.Content, req.Question)
+	nimDuration := time.Since(nimStart)
+
+	if err != nil {
+		log.Printf("nim error: %v", err)
+		writeError(w, http.StatusBadGateway, "ai", "AI analysis failed", requestID)
+		return
+	}
+
+	resp := successResponse{Status: "success"}
+	resp.Result.Title = doc.Title
+	resp.Result.NimAnswer = answer
+	resp.Meta = meta{
+		RequestID:       requestID,
+		TotalDurationMs: time.Since(start).Milliseconds(),
+		FetchDurationMs: fetchDuration.Milliseconds(),
+		NimDurationMs:   nimDuration.Milliseconds(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(resp)
+}
 
 func statusFor(category string) int {
 	switch category {
