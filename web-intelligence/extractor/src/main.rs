@@ -31,6 +31,20 @@ struct Document {
     metadata: Metadata,
 }
 
+#[derive(Deserialize)]
+struct Request {
+    #[serde(default)]
+    url: String,
+    #[serde(default)]
+    max_response_bytes: u64,
+    #[serde(default)]
+    timeout_ms: u64,
+    #[serde(default)]
+    prerendered_html: Option<String>,
+    #[serde(default)]
+    final_url: Option<String>,
+}
+
 #[derive(Serialize)]
 struct Metadata {
     content_type: String,
@@ -82,6 +96,26 @@ fn main() {
 
 fn run(req: &Request) -> Result<Document, (&'static str, String)> {
     let start = std::time::Instant::now();
+
+    if let Some(html) = &req.prerendered_html {
+        let extracted = extract::extract(html);
+        if extracted.content.trim().is_empty() {
+            return Err((
+                "no_content_extracted",
+                "headless render still produced no content".into(),
+            ));
+        }
+        return Ok(Document {
+            title: extracted.title,
+            content: extracted.content,
+            metadata: Metadata {
+                content_type: "text/html".to_string(),
+                content_length_bytes: html.len() as u64,
+                fetch_duration_ms: start.elapsed().as_millis(),
+                final_url: req.final_url.clone().unwrap_or_default(),
+            },
+        });
+    }
 
     url_validate::validate(&req.url).map_err(|e| ("invalid_url", e.to_string()))?;
 
