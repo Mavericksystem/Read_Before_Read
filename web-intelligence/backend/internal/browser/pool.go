@@ -51,3 +51,12 @@ func New(size int) (*Pool, error) {
 
 	return p, nil
 }
+
+func (p *Pool) Acquire(ctx context.Context) (context.Context, error) {
+	select {
+	case tabCtx := <-p.free:
+		return tabCtx, nil
+	case <-ctx.Done():
+		return nil, fmt.Errorf("browser pool: %w waiting for a free tab", ctx.Err())
+	}
+}
