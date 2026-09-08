@@ -62,7 +62,7 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusMethodNotAllowed, "validation", "only POST is supported", requestID)
 		return
 	}
-	``
+
 	var req analyzeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "validation", "malformed JSON body", requestID)
@@ -92,14 +92,12 @@ func (a *Analyzer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		if extErr, ok := err.(*extractor.Error); ok && extErr.Category == "no_content_extracted" {
+		if extErr, ok := err.(*extractor.Error); ok && (extErr.Category == "no_content_extracted" || extErr.Category == "fetch_failure") {
 			html, renderErr := a.Browser.Render(ctx, req.URL, 15*time.Second)
 			if renderErr == nil {
 				doc, err = a.Extractor.RunFromHTML(ctx, html, req.URL)
 			}
-			// If renderErr != nil, fall through with the original
-			// no_content_extracted error below — don't mask a real
-			// render failure as success.
+
 		}
 	}
 	fetchDuration := time.Since(fetchStart)
