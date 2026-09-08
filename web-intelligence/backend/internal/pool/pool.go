@@ -84,3 +84,14 @@ func (p *Pool) replace(w *worker) {
 	}
 	p.free <- nw
 }
+
+func (p *Pool) Shutdown() {
+	p.mu.Lock()
+	p.shutdown = true
+	p.mu.Unlock()
+
+	for i := 0; i < p.size; i++ {
+		w := <-p.free
+		w.kill()
+	}
+}
