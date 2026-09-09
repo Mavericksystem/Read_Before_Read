@@ -54,7 +54,7 @@ export default function App() {
                     <span className="brand-mark">WI</span>
                     <span>Web Intelligence</span>
                 </a>
-                <span className="status-pill"><span className="status-dot" /> AI research assistant</span>
+                {/* <span className="status-pill"><span className="status-dot" /> AI research assistant</span> */}
             </nav>
 
             <section className="hero">
