@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 const (
@@ -20,6 +22,8 @@ type Client struct {
 	apiKey     string
 	httpClient *http.Client
 }
+
+var nimLimiter = rate.NewLimiter(rate.Every(time.Minute/40), 1)
 
 func NewClient() (*Client, error) {
 	key := os.Getenv("NVIDIA_NIM_API_KEY")
@@ -49,6 +53,9 @@ type chatResponse struct {
 }
 
 func (c *Client) Analyze(ctx context.Context, title, content, question string) (string, error) {
+	if err := nimLimiter.Wait(ctx); err != nil {
+		return "", err // ctx deadline hit while queued
+	}
 	prompt := buildPrompt(title, content, question)
 
 	reqBody := chatRequest{
