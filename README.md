@@ -30,6 +30,7 @@ A backend systems-engineering demo: paste a URL, and it fetches the page, extrac
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Architecture](#architecture)
+- [Performance](#performance)
 - [Known Limitations](#known-limitations)
 - [Contributing](#contributing)
 - [License & Credits](#license--credits)
@@ -126,11 +127,74 @@ Go and Rust communicate over a hand-rolled line-delimited JSON protocol across O
 
 ---
 
+## Performance
+
+Benchmarks were run locally on **2026-09-11**. Results are intended to characterize the current local configuration, not production capacity.
+
+### End-to-end API
+
+Load test:
+
+- **5 VUs**
+- **90-second test**
+- **90-second per-request timeout**
+- `POST /api/v1/analyze`
+
+| Metric | Result |
+|---|---:|
+| Requests completed | 8 |
+| Throughput | **0.0667 req/s** |
+| Average latency | **52.2s** |
+| p50 | **52.15s** |
+| p95 | **74s** |
+| Maximum latency | **75s** |
+| Failure rate | **62.5%** |
+
+The end-to-end result is dominated by the external NVIDIA NIM dependency under concurrent load.
+
+### Rust extraction
+
+#### Real-world fetch + extraction
+
+Seven successful real-world URL requests were sampled through the API:
+
+| Metric | Result |
+|---|---:|
+| Samples | 7 |
+| Average | **1.94s** |
+| p50 | **2.08s** |
+| Minimum | **0.99s** |
+| Maximum | **3.21s** |
+
+These timings include the Rust-side URL fetch and extraction path. They are real-world samples rather than synthetic microbenchmarks.
+
+#### Criterion extraction benchmark
+
+`cargo bench` on the Rust extractor produced:
+
+| Benchmark | Result |
+|---|---:|
+| Small page (758 B) | **11.832 µs** |
+| Large page (194 KB) | **2.5432 ms** |
+| Subprocess startup | **8.8875 ms** |
+
+The Criterion benchmark measures local extraction/process overhead and does **not** represent Internet fetch latency.
+
+### Resource usage
+
+During the observed k6 load test, the Go server's Windows working set remained around **21–22 MB**. The captured PowerShell `CPU` value was cumulative CPU time rather than CPU utilization percentage, so no CPU-% claim is made here.
+
+---
+
 ## Known Limitations
 
+- **NVIDIA NIM is the dominant external bottleneck.** Observed inference latency was commonly around 20–30+ seconds, with some requests taking substantially longer.
+- Under concurrent load, NVIDIA NIM returned `503 Service temporarily overloaded`. Increasing NIM concurrency from 1 to 2 did not provide scalable throughput and increased upstream overload symptoms.
+- The current synchronous request path has a **75-second end-to-end deadline**. Slow or overloaded NIM calls can therefore cause otherwise healthy requests to time out.
+- The Go NIM HTTP client also has a **60-second client timeout**, which can terminate a request before the 75-second application deadline if NIM has not returned HTTP headers.
 - Sites with aggressive bot protection (Cloudflare-style challenges) may return `403` and fail — advanced anti-bot bypass is intentionally out of scope.
 - Very slow pages time out after 20s (by design).
-- Pool sizes are currently reasonable defaults, not yet load-tested.
+- Pool sizes are reasonable local defaults; the benchmark above does not establish production-scale capacity.
 - No persistence, no auth, no hosting — this runs locally only.
 
 ---
