@@ -3,6 +3,8 @@ package nim
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
 )
 
 type ThrottledClient struct {
@@ -20,12 +22,55 @@ func NewThrottled(client *Client, maxInFlight int) *ThrottledClient {
 	}
 }
 
-func (t *ThrottledClient) Analyze(ctx context.Context, title, content, question string) (string, error) {
+func (t *ThrottledClient) Analyze(
+	ctx context.Context,
+	title, content, question string,
+) (string, error) {
+
+	start := time.Now()
+
+	if deadline, ok := ctx.Deadline(); ok {
+		log.Printf(
+			"nim: stage=before-semaphore deadline=%s remaining=%s ctx_err=%v",
+			deadline.Format(time.RFC3339Nano),
+			time.Until(deadline).Round(time.Millisecond),
+			ctx.Err(),
+		)
+	}
+
 	select {
 	case t.sem <- struct{}{}:
-		defer func() { <-t.sem }()
+
+		log.Printf(
+			"nim: semaphore-acquired wait=%s",
+			time.Since(start).Round(time.Millisecond),
+		)
+
+		defer func() {
+			<-t.sem
+			log.Printf("nim: semaphore-released")
+		}()
+
 	case <-ctx.Done():
-		return "", fmt.Errorf("nim: %w waiting for a throttle slot", ctx.Err())
+
+		log.Printf(
+			"nim: semaphore-failed wait=%s err=%v",
+			time.Since(start).Round(time.Millisecond),
+			ctx.Err(),
+		)
+
+		return "", fmt.Errorf(
+			"nim: %w waiting for a throttle slot",
+			ctx.Err(),
+		)
+	}
+
+	if deadline, ok := ctx.Deadline(); ok {
+		log.Printf(
+			"nim: stage=after-semaphore remaining=%s ctx_err=%v",
+			time.Until(deadline).Round(time.Millisecond),
+			ctx.Err(),
+		)
 	}
 
 	return t.client.Analyze(ctx, title, content, question)
