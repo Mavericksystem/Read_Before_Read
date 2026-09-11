@@ -18,7 +18,7 @@ import (
 const (
 	extractorPoolSize = 8
 	browserPoolSize   = 2
-	nimMaxInFlight    = 1
+	nimMaxInFlight    = 2
 	admissionCapacity = 50 // max requests in flight before 503
 )
 
